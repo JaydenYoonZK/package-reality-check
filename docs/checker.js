@@ -1,5 +1,5 @@
 /**
- * phantom-deps engine
+ * package-reality-check engine
  *
  * Pure functions only: input parsing, name normalization, stdlib and
  * builtin filtering, typo distance, and verdict logic. Network calls
