@@ -18,4 +18,4 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
-[1.0.0]: https://github.com/JaydenYoonZK/phantom-deps/releases/tag/v1.0.0
+[1.0.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.0.0

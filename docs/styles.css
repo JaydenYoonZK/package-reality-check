@@ -359,7 +359,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 10px 26px; }
   html { scroll-behavior: auto; }
 }
 
-/* phantom-deps additions */
+/* package-reality-check additions */
 .verdict {
   display: inline-block;
   padding: 3px 12px;
