@@ -1,0 +1,28 @@
+name: Phantom package sighting
+description: An AI tool suggested a package that does not exist, or a suspicious lookalike.
+title: "[sighting]: "
+labels: ["sighting"]
+body:
+  - type: input
+    id: package
+    attributes:
+      label: Package name
+    validations:
+      required: true
+  - type: dropdown
+    id: ecosystem
+    attributes:
+      label: Ecosystem
+      options: [npm, PyPI, other]
+    validations:
+      required: true
+  - type: input
+    id: tool
+    attributes:
+      label: Which tool suggested it?
+      placeholder: e.g. ChatGPT, Copilot, Cursor
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What were you building when it was suggested? Paste the suggestion if you still have it.

@@ -1,0 +1,12 @@
+name: Bug report
+description: Wrong verdict, parsing miss, or broken UI.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Input you pasted (or a minimal version), what the tool said, what you expected.
+    validations:
+      required: true
