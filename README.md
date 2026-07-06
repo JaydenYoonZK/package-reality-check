@@ -1,18 +1,18 @@
-# Phantom Deps 👻
+# Package Reality Check 👻
 
 Check AI-suggested dependencies against npm and PyPI before you install them. Paste a `package.json`, a `requirements.txt`, or code with imports, and find out which packages are real, which are brand new lookalikes, and which were invented outright.
 
 <p>
-  <a href="https://jaydenyoonzk.github.io/phantom-deps/"><img src="https://img.shields.io/badge/Live%20tool-open-abcf37?style=for-the-badge&logo=githubpages&logoColor=black" alt="Open the live tool"></a>
-  <a href="https://github.com/JaydenYoonZK/phantom-deps/stargazers"><img src="https://img.shields.io/github/stars/JaydenYoonZK/phantom-deps?style=for-the-badge&logo=github" alt="GitHub stars"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/JaydenYoonZK/phantom-deps?style=for-the-badge" alt="MIT License"></a>
+  <a href="https://jaydenyoonzk.github.io/package-reality-check/"><img src="https://img.shields.io/badge/Live%20tool-open-abcf37?style=for-the-badge&logo=githubpages&logoColor=black" alt="Open the live tool"></a>
+  <a href="https://github.com/JaydenYoonZK/package-reality-check/stargazers"><img src="https://img.shields.io/github/stars/JaydenYoonZK/package-reality-check?style=for-the-badge&logo=github" alt="GitHub stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/JaydenYoonZK/package-reality-check?style=for-the-badge" alt="MIT License"></a>
 </p>
 
-<a href="https://jaydenyoonzk.github.io/phantom-deps/?demo">
-  <img src="docs/assets/preview.png" alt="Phantom Deps flagging two invented packages from an AI-generated requirements.txt, with did-you-mean hints" width="100%">
+<a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
+  <img src="docs/assets/preview.png" alt="Package Reality Check flagging two invented packages from an AI-generated requirements.txt, with did-you-mean hints" width="100%">
 </a>
 
-**[Open the live tool](https://jaydenyoonzk.github.io/phantom-deps/)** or **[see it catch phantoms in a sample](https://jaydenyoonzk.github.io/phantom-deps/?demo)**. Checks run from your browser straight against the public registries. Your code goes nowhere else.
+**[Open the live tool](https://jaydenyoonzk.github.io/package-reality-check/)** or **[see it catch phantoms in a sample](https://jaydenyoonzk.github.io/package-reality-check/?demo)**. Checks run from your browser straight against the public registries. Your code goes nowhere else.
 
 ## Why this exists
 
@@ -30,13 +30,13 @@ The defense is boring and effective: look the package up before you install it. 
 
 ## Use it
 
-No install: [jaydenyoonzk.github.io/phantom-deps](https://jaydenyoonzk.github.io/phantom-deps/)
+No install: [jaydenyoonzk.github.io/package-reality-check](https://jaydenyoonzk.github.io/package-reality-check/)
 
 Run locally:
 
 ```bash
-git clone https://github.com/JaydenYoonZK/phantom-deps.git
-cd phantom-deps
+git clone https://github.com/JaydenYoonZK/package-reality-check.git
+cd package-reality-check
 npm run serve   # http://localhost:8322
 ```
 
@@ -62,7 +62,7 @@ npm test
 
 ## Limitations worth knowing
 
-- Only npm and PyPI. Other ecosystems are tracked in [issues](https://github.com/JaydenYoonZK/phantom-deps/issues).
+- Only npm and PyPI. Other ecosystems are tracked in [issues](https://github.com/JaydenYoonZK/package-reality-check/issues).
 - Internal/private packages will show as PHANTOM, because the tool can only see public registries. That is also a nudge to protect those names.
 - Edit distance cannot read intent; occasional legitimate near-name packages will ask you for thirty seconds of judgment.
 

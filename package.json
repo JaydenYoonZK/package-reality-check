@@ -1,5 +1,5 @@
 {
-  "name": "phantom-deps",
+  "name": "package-reality-check",
   "version": "1.0.0",
   "description": "Check AI-suggested dependencies against npm and PyPI before installing. Catches hallucinated packages and typosquats, in the browser.",
   "type": "module",
@@ -12,6 +12,6 @@
   "author": "Jayden Yoon ZK",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JaydenYoonZK/phantom-deps.git"
+    "url": "https://github.com/JaydenYoonZK/package-reality-check.git"
   }
 }

@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phantom Deps: check AI-suggested packages before you install</title>
+  <title>Package Reality Check: are AI-suggested packages real?</title>
   <meta name="description" content="AI code assistants invent package names, and attackers register them. Paste a package.json, requirements.txt, or code, and check every dependency against npm and PyPI.">
-  <link rel="canonical" href="https://jaydenyoonzk.github.io/phantom-deps/">
+  <link rel="canonical" href="https://jaydenyoonzk.github.io/package-reality-check/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0c0a'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='32' fill='%23abcf37'%3E%F0%9F%91%BB%3C/text%3E%3C/svg%3E">
-  <meta property="og:title" content="Phantom Deps: check AI-suggested packages before you install">
+  <meta property="og:title" content="Package Reality Check: are AI-suggested packages real?">
   <meta property="og:description" content="Nearly 1 in 5 packages suggested by code assistants may not exist. Check yours against npm and PyPI in seconds, right in the browser.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://jaydenyoonzk.github.io/phantom-deps/">
-  <meta property="og:image" content="https://jaydenyoonzk.github.io/phantom-deps/assets/preview.png">
+  <meta property="og:url" content="https://jaydenyoonzk.github.io/package-reality-check/">
+  <meta property="og:image" content="https://jaydenyoonzk.github.io/package-reality-check/assets/preview.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://jaydenyoonzk.github.io/phantom-deps/assets/preview.png">
+  <meta name="twitter:image" content="https://jaydenyoonzk.github.io/package-reality-check/assets/preview.png">
   <link rel="stylesheet" href="styles.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Phantom Deps",
+    "name": "Package Reality Check",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Any (browser-based)",
-    "url": "https://jaydenyoonzk.github.io/phantom-deps/",
+    "url": "https://jaydenyoonzk.github.io/package-reality-check/",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
     "author": { "@type": "Person", "name": "Jayden Yoon ZK", "url": "https://github.com/JaydenYoonZK" }
   }
@@ -93,21 +93,21 @@
 
     <h2>Questions people ask</h2>
     <h3>Does my code get uploaded?</h3>
-    <p>No. Parsing happens in your browser, and the only network requests are the package name lookups sent directly to npm and PyPI. You can verify this in the network tab, and the <a href="https://github.com/JaydenYoonZK/phantom-deps">source</a> is small enough to read in one sitting.</p>
+    <p>No. Parsing happens in your browser, and the only network requests are the package name lookups sent directly to npm and PyPI. You can verify this in the network tab, and the <a href="https://github.com/JaydenYoonZK/package-reality-check">source</a> is small enough to read in one sitting.</p>
     <h3>My internal company package shows as PHANTOM. Is that a bug?</h3>
     <p>No, it is the expected result: the tool only sees public registries. It is also a useful prompt to check that your internal name is protected from public registration.</p>
     <h3>Why is a real package flagged as a lookalike?</h3>
     <p>Edit distance cannot read intent. Forks and legitimately similar names will occasionally trip the check. The verdict text always says what the similarity is, so you can decide in seconds.</p>
     <h3>Which ecosystems are supported?</h3>
-    <p>npm and PyPI, which is where the published hallucination research concentrated and where CORS-friendly registry APIs exist. Other ecosystems are on the <a href="https://github.com/JaydenYoonZK/phantom-deps/issues">issue tracker</a>.</p>
+    <p>npm and PyPI, which is where the published hallucination research concentrated and where CORS-friendly registry APIs exist. Other ecosystems are on the <a href="https://github.com/JaydenYoonZK/package-reality-check/issues">issue tracker</a>.</p>
   </div>
 </main>
 
 <footer>
   <div class="wrap">
     <span>Built by <a href="https://github.com/JaydenYoonZK">Jayden Yoon ZK</a></span>
-    <a href="https://github.com/JaydenYoonZK/phantom-deps">Source on GitHub</a>
-    <a href="https://github.com/JaydenYoonZK/phantom-deps/issues">Report an issue</a>
+    <a href="https://github.com/JaydenYoonZK/package-reality-check">Source on GitHub</a>
+    <a href="https://github.com/JaydenYoonZK/package-reality-check/issues">Report an issue</a>
     <a href="https://jaydenyoonzk.github.io/ai-paste-cleaner/">Sibling tool: AI Paste Cleaner</a>
     <span>MIT License</span>
   </div>
