@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-07-07
+
+### Added
+
+- Paste and check button that reads the clipboard and runs the check in one step, with a keyboard-shortcut hint where clipboard access is restricted.
+
 ## [1.0.0] - 2026-07-07
 
 First stable release.
@@ -18,4 +24,5 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.0.0
