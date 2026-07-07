@@ -31,18 +31,62 @@
 <body>
 
 <header>
-  <div class="wrap">
+  <div class="wrap header-grid">
+    <div class="header-copy">
     <p class="eyebrow">Package Reality Check</p>
     <h1>Did your AI assistant just invent that package?</h1>
     <p class="lede">Code assistants recommend dependencies with total confidence, and a surprising share of them do not exist. Attackers register those invented names and wait for the next person to run <code style="font-family:var(--mono)">pip install</code>. Paste your dependencies below and check every one against the real registries before anything touches your machine.</p>
-    <p class="privacy"><span class="dot"></span> Queries go from your browser straight to npm and PyPI. Nothing else sees your code.</p>
+    <p class="privacy"><span class="dot"></span> 🔒 Queries go from your browser straight to npm and PyPI. Nothing else sees your code.</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+<svg viewBox="0 0 320 270" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <radialGradient id="hg2" cx="0.2" cy="0" r="1">
+      <stop offset="0" stop-color="#abcf37" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#abcf37" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="4" y="4" width="312" height="262" rx="24" fill="#16140f" stroke="#ffffff" stroke-opacity="0.12"/>
+  <rect x="4" y="4" width="312" height="262" rx="24" fill="url(#hg2)"/>
+  <circle cx="28" cy="28" r="4" fill="#ffffff" fill-opacity="0.14"/>
+  <circle cx="43" cy="28" r="4" fill="#ffffff" fill-opacity="0.14"/>
+  <circle cx="58" cy="28" r="4" fill="#ffffff" fill-opacity="0.14"/>
+  <path d="M4 48H316" stroke="#ffffff" stroke-opacity="0.08"/>
+  <text x="28" y="82" fill="#c8c2b6" font-family="ui-monospace, Menlo, monospace" font-size="14">express</text>
+  <g>
+    <rect x="196" y="64" width="52" height="26" rx="13" fill="#a7e26a" fill-opacity="0.14" stroke="#a7e26a" stroke-opacity="0.5"/>
+    <text x="222" y="81" text-anchor="middle" fill="#a7e26a" font-family="ui-monospace, Menlo, monospace" font-size="11" font-weight="700">OK</text>
+    <animate attributeName="opacity" values="1;0.55;1" dur="3.4s" repeatCount="indefinite"/>
+  </g>
+  <path d="M28 104H292" stroke="#ffffff" stroke-opacity="0.06"/>
+  <text x="28" y="138" fill="#c8c2b6" font-family="ui-monospace, Menlo, monospace" font-size="14">lodahs</text>
+  <g>
+    <rect x="196" y="120" width="64" height="26" rx="13" fill="#ffc65c" fill-opacity="0.13" stroke="#ffc65c" stroke-opacity="0.5"/>
+    <text x="228" y="137" text-anchor="middle" fill="#ffc65c" font-family="ui-monospace, Menlo, monospace" font-size="11" font-weight="700">CHECK</text>
+    <animate attributeName="opacity" values="1;0.45;1" dur="3.4s" begin="0.6s" repeatCount="indefinite"/>
+  </g>
+  <path d="M28 160H292" stroke="#ffffff" stroke-opacity="0.06"/>
+  <text x="28" y="194" fill="#c8c2b6" font-family="ui-monospace, Menlo, monospace" font-size="14">jwt-auth-pro-max</text>
+  <g>
+    <rect x="196" y="176" width="84" height="26" rx="13" fill="#ff7a6e" fill-opacity="0.13" stroke="#ff7a6e" stroke-opacity="0.55"/>
+    <text x="238" y="193" text-anchor="middle" fill="#ff7a6e" font-family="ui-monospace, Menlo, monospace" font-size="11" font-weight="700">PHANTOM</text>
+    <animate attributeName="opacity" values="1;0.35;1" dur="2.6s" begin="1.1s" repeatCount="indefinite"/>
+  </g>
+  <g>
+    <text x="262" y="238" font-size="30" text-anchor="middle" fill="#f3f0e9">&#128123;</text>
+    <animateTransform attributeName="transform" type="translate" values="0 0; 0 -7; 0 0" dur="4s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"/>
+    <animate attributeName="opacity" values="0.95;0.6;0.95" dur="4s" repeatCount="indefinite"/>
+  </g>
+  <text x="28" y="242" fill="#8f887c" font-size="12" font-family="ui-sans-serif, system-ui, sans-serif">2 of 3 need a closer look</text>
+</svg>
+    </div>
   </div>
 </header>
 
 <main class="wrap">
   <div class="card">
     <label for="input" style="display:none">Dependencies to check</label>
-    <textarea id="input" placeholder="Paste a package.json, a requirements.txt, or code with imports..." spellcheck="false" autofocus></textarea>
+    <textarea id="input" placeholder="Paste a package.json, a requirements.txt, or code with imports..." spellcheck="false"></textarea>
     <div class="toolbar">
       <button id="paste" class="primary" type="button">Paste &amp; check</button>
       <button id="check" type="button">Check packages</button>
@@ -63,11 +107,11 @@
   </div>
 
   <div class="prose">
-    <h2>What package hallucination is</h2>
+    <h2>👻 What package hallucination is</h2>
     <p>Large language models complete patterns. When a pattern calls for a package that handles JWT auth for FastAPI, a model will sometimes produce a plausible name whether or not anyone ever published it. In <a href="https://arxiv.org/abs/2406.10279" rel="noopener">a 2024 study of 576,000 generated code samples</a>, researchers found that close to one in five recommended packages did not exist, and collected over 200,000 unique invented names. The names repeat across users, which is the dangerous part.</p>
     <p>Repeatable phantom names are an attack surface. Someone registers the invented package, fills it with malware, and waits for developers to install exactly what their assistant suggested. The security community calls this slopsquatting, a modern cousin of typosquatting. You do not need to be careless to get hit; you only need to trust a suggestion once.</p>
 
-    <h2>What the verdicts mean</h2>
+    <h2>🚦 What the verdicts mean</h2>
     <table>
       <tr><th>Verdict</th><th>Meaning</th></tr>
       <tr><td><span class="verdict phantom">PHANTOM</span></td><td>The package is not in the registry. If a tool suggested it, the name was likely invented. Never pre-create internal names publicly; a squatter can claim them.</td></tr>
@@ -76,7 +120,7 @@
       <tr><td><span class="verdict ok">OK</span></td><td>Established package. This says nothing about its quality, only that it is real and not an obvious impostor.</td></tr>
     </table>
 
-    <h2>What this tool checks</h2>
+    <h2>🧰 What this tool checks</h2>
     <ul>
       <li>Every dependency in a pasted <code>package.json</code> (all dependency fields), <code>requirements.txt</code> (specifiers, extras, and markers are handled), or source code with <code>import</code> and <code>require</code> statements.</li>
       <li>Node built-ins and the Python standard library are recognized and skipped, including modules removed in recent Python versions such as <code>telnetlib</code>.</li>
@@ -84,7 +128,7 @@
       <li>Edit distance against several hundred of the most-installed packages in each ecosystem, to catch <code>reqeusts</code> and <code>lodahs</code> before they catch you.</li>
     </ul>
 
-    <h2>How to protect yourself beyond this page</h2>
+    <h2>🛡️ How to protect yourself beyond this page</h2>
     <ul>
       <li>Treat dependency suggestions from AI tools as unverified input, the same way you treat their code.</li>
       <li>Install from lockfiles in CI, so one bad <code>npm install</code> on a laptop cannot silently add a package.</li>
@@ -92,7 +136,7 @@
       <li>Internal package names belong in a private registry with a scoped namespace, so nobody can shadow them publicly.</li>
     </ul>
 
-    <h2>Questions people ask</h2>
+    <h2>💬 Questions people ask</h2>
     <h3>Does my code get uploaded?</h3>
     <p>No. Parsing happens in your browser, and the only network requests are the package name lookups sent directly to npm and PyPI. You can verify this in the network tab, and the <a href="https://github.com/JaydenYoonZK/package-reality-check">source</a> is small enough to read in one sitting.</p>
     <h3>My internal company package shows as PHANTOM. Is that a bug?</h3>
@@ -114,6 +158,7 @@
   </div>
 </footer>
 
+<button id="to-top" class="to-top" type="button" aria-label="Back to top">&#8593;</button>
 <script type="module" src="app.js"></script>
 </body>
 </html>
