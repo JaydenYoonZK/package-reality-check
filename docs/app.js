@@ -189,3 +189,11 @@ $("clear").addEventListener("click", () => {
 if (new URLSearchParams(location.search).has("demo")) {
   $("sample-req").click();
 }
+
+const toTop = document.getElementById("to-top");
+if (toTop) {
+  addEventListener("scroll", () => {
+    toTop.classList.toggle("show", scrollY > 600);
+  }, { passive: true });
+  toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
+}
