@@ -88,6 +88,12 @@ test("exact popular names are not their own lookalike", () => {
   assert.equal(lookalikeOf("express", "npm"), null);
 });
 
+test("verdict: wrong-ecosystem when found in the other registry", () => {
+  const v = verdict("left-pad", "pypi", { exists: false, foundIn: "other" });
+  assert.equal(v.level, "warn");
+  assert.match(v.title, /on npm, not PyPI/);
+});
+
 test("verdict: phantom when missing", () => {
   const v = verdict("made-up-pkg-xyz", "npm", { exists: false });
   assert.equal(v.level, "phantom");

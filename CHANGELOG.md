@@ -30,6 +30,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Paste and check button that reads the clipboard and runs the check in one step, with a keyboard-shortcut hint where clipboard access is restricted.
 
+## [1.1.0] - 2026-07-07
+
+### Fixed
+
+- A bare list of package names (no package.json or imports) is checked against one registry, and a real package from the other ecosystem was wrongly reported as a phantom. Before calling anything a phantom, the checker now confirms it is missing from the other registry too, and otherwise reports "real package, but on the other registry" so a wrong-ecosystem guess never reads as an invented package.
+
 ## [1.0.0] - 2026-07-07
 
 First stable release.
@@ -45,5 +51,6 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
 [1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.0.0
