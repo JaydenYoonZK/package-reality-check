@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.2.0] - 2026-07-07
 
 ### Added
 
@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- A bare list of package names (no package.json or imports) is checked against one registry, and a real package from the other ecosystem was wrongly reported as a phantom. Before calling anything a phantom, the checker now confirms it is missing from the other registry too, and otherwise reports "real package, but on the other registry" so a wrong-ecosystem guess never reads as an invented package.
 - Scroll-to-top button no longer turns dark on hover (it was caught by the generic secondary-button hover rule).
 - Reference tables now scroll inside their own container on narrow screens instead of widening the page.
 
@@ -29,12 +30,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - Paste and check button that reads the clipboard and runs the check in one step, with a keyboard-shortcut hint where clipboard access is restricted.
-
-## [1.1.0] - 2026-07-07
-
-### Fixed
-
-- A bare list of package names (no package.json or imports) is checked against one registry, and a real package from the other ecosystem was wrongly reported as a phantom. Before calling anything a phantom, the checker now confirms it is missing from the other registry too, and otherwise reports "real package, but on the other registry" so a wrong-ecosystem guess never reads as an invented package.
 
 ## [1.0.0] - 2026-07-07
 
@@ -51,6 +46,8 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0
 [1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
+[1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0
 [1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.0.0
