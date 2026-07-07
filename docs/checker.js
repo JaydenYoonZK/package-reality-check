@@ -261,13 +261,27 @@ export function extract(text) {
 export const NEW_PACKAGE_DAYS = 120;
 export const LOW_DOWNLOADS = 500;
 
+const OTHER_ECO = { npm: "PyPI", pypi: "npm" };
+
 /**
  * Compute a verdict from registry facts.
- * facts: { exists, createdAt?, downloads?, deprecated? }
+ * facts: { exists, createdAt?, downloads?, deprecated?, foundIn? }
+ * foundIn is set when the package is missing here but exists in the other
+ * registry, which usually means the ecosystem was guessed wrong for a bare
+ * list rather than the package being invented.
  */
 export function verdict(name, ecosystem, facts, now = Date.now()) {
   const lookalike = lookalikeOf(name, ecosystem);
   if (!facts.exists) {
+    if (facts.foundIn) {
+      const here = ecosystem === "npm" ? "npm" : "PyPI";
+      const there = OTHER_ECO[ecosystem];
+      return {
+        level: "warn",
+        title: `Real package, but on ${there}, not ${here}`,
+        detail: `Not found on ${here}, yet a package with this name exists on ${there}. A bare list of names is checked against one registry at a time; this one looks like it belongs to the other. Paste a package.json or requirements.txt to remove the guesswork.`
+      };
+    }
     return {
       level: "phantom",
       title: "Not found in the registry",

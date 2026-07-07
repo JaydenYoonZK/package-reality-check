@@ -15,11 +15,26 @@ const CONCURRENCY = 6;
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
+// Does this name exist in the other ecosystem? Used to catch a wrong-eco
+// guess on a bare list before we wrongly call a real package a phantom.
+async function existsInOther(dep) {
+  const other = dep.ecosystem === "npm" ? "pypi" : "npm";
+  try {
+    const res = await fetch(registryUrls(dep.name, other).api, { headers: { Accept: "application/json" } });
+    if (res.status === 404) return false;
+    if (!res.ok) return false;
+    const json = await res.json();
+    return !(json && json.error);
+  } catch { return false; }
+}
+
 async function factsFor(dep) {
   const urls = registryUrls(dep.name, dep.ecosystem);
   try {
     const res = await fetch(urls.api, { headers: { Accept: "application/json" } });
-    if (res.status === 404) return { exists: false };
+    if (res.status === 404) {
+      return { exists: false, foundIn: (await existsInOther(dep)) ? "other" : null };
+    }
     if (!res.ok) return { error: `registry answered ${res.status}` };
     const json = await res.json();
 
