@@ -1,6 +1,6 @@
 {
   "name": "package-reality-check",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Check AI-suggested dependencies against npm and PyPI before installing. Catches hallucinated packages and typosquats, in the browser.",
   "type": "module",
   "private": true,
