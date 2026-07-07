@@ -14,6 +14,13 @@
   <meta property="og:image" content="https://jaydenyoonzk.github.io/package-reality-check/assets/preview.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://jaydenyoonzk.github.io/package-reality-check/assets/preview.png">
+  <script>
+    (function () {
+      var t = new URLSearchParams(location.search).get("theme") || localStorage.getItem("theme");
+      if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css">
   <script type="application/ld+json">
   {
@@ -30,7 +37,21 @@
 </head>
 <body>
 
-<header>
+<nav class="site-nav" aria-label="Page navigation">
+  <div class="wrap">
+    <a class="brand" href="#top">Jayden Yoon ZK</a>
+    <div class="nav-links">
+      <a href="#hallucination">The problem</a>
+      <a href="#verdicts">Verdicts</a>
+      <a href="#checks">Checks</a>
+      <a href="#protect">Protection</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark mode">☀️</button>
+  </div>
+</nav>
+
+<header id="top">
   <div class="wrap header-grid">
     <div class="header-copy">
     <p class="eyebrow">Package Reality Check</p>
@@ -107,11 +128,11 @@
   </div>
 
   <div class="prose">
-    <h2>👻 What package hallucination is</h2>
+    <h2 id="hallucination">👻 What package hallucination is</h2>
     <p>Large language models complete patterns. When a pattern calls for a package that handles JWT auth for FastAPI, a model will sometimes produce a plausible name whether or not anyone ever published it. In <a href="https://arxiv.org/abs/2406.10279" rel="noopener">a 2024 study of 576,000 generated code samples</a>, researchers found that close to one in five recommended packages did not exist, and collected over 200,000 unique invented names. The names repeat across users, which is the dangerous part.</p>
     <p>Repeatable phantom names are an attack surface. Someone registers the invented package, fills it with malware, and waits for developers to install exactly what their assistant suggested. The security community calls this slopsquatting, a modern cousin of typosquatting. You do not need to be careless to get hit; you only need to trust a suggestion once.</p>
 
-    <h2>🚦 What the verdicts mean</h2>
+    <h2 id="verdicts">🚦 What the verdicts mean</h2>
     <table>
       <tr><th>Verdict</th><th>Meaning</th></tr>
       <tr><td><span class="verdict phantom">PHANTOM</span></td><td>The package is not in the registry. If a tool suggested it, the name was likely invented. Never pre-create internal names publicly; a squatter can claim them.</td></tr>
@@ -120,7 +141,7 @@
       <tr><td><span class="verdict ok">OK</span></td><td>Established package. This says nothing about its quality, only that it is real and not an obvious impostor.</td></tr>
     </table>
 
-    <h2>🧰 What this tool checks</h2>
+    <h2 id="checks">🧰 What this tool checks</h2>
     <ul>
       <li>Every dependency in a pasted <code>package.json</code> (all dependency fields), <code>requirements.txt</code> (specifiers, extras, and markers are handled), or source code with <code>import</code> and <code>require</code> statements.</li>
       <li>Node built-ins and the Python standard library are recognized and skipped, including modules removed in recent Python versions such as <code>telnetlib</code>.</li>
@@ -128,7 +149,7 @@
       <li>Edit distance against several hundred of the most-installed packages in each ecosystem, to catch <code>reqeusts</code> and <code>lodahs</code> before they catch you.</li>
     </ul>
 
-    <h2>🛡️ How to protect yourself beyond this page</h2>
+    <h2 id="protect">🛡️ How to protect yourself beyond this page</h2>
     <ul>
       <li>Treat dependency suggestions from AI tools as unverified input, the same way you treat their code.</li>
       <li>Install from lockfiles in CI, so one bad <code>npm install</code> on a laptop cannot silently add a package.</li>
@@ -136,7 +157,7 @@
       <li>Internal package names belong in a private registry with a scoped namespace, so nobody can shadow them publicly.</li>
     </ul>
 
-    <h2>💬 Questions people ask</h2>
+    <h2 id="faq">💬 Questions people ask</h2>
     <h3>Does my code get uploaded?</h3>
     <p>No. Parsing happens in your browser, and the only network requests are the package name lookups sent directly to npm and PyPI. You can verify this in the network tab, and the <a href="https://github.com/JaydenYoonZK/package-reality-check">source</a> is small enough to read in one sitting.</p>
     <h3>My internal company package shows as PHANTOM. Is that a bug?</h3>
