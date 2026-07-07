@@ -164,6 +164,22 @@ $("sample-js").addEventListener("click", () => {
   run();
 });
 
+const pasteBtn = $("paste");
+pasteBtn.addEventListener("click", async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) {
+      input.value = text;
+      run();
+      return;
+    }
+  } catch { /* permission denied or unsupported */ }
+  input.focus();
+  const prev = pasteBtn.textContent;
+  pasteBtn.textContent = navigator.platform?.includes("Mac") ? "Press \u2318V, then Check" : "Press Ctrl+V, then Check";
+  setTimeout(() => { pasteBtn.textContent = prev; }, 2400);
+});
+
 $("clear").addEventListener("click", () => {
   input.value = "";
   results.hidden = true;
