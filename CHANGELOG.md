@@ -48,6 +48,4 @@ First stable release.
 
 [1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0
 [1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
-[1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0
-[1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.0.0
