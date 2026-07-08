@@ -96,6 +96,19 @@ export function safeText(s) {
   return String(s).replace(/[\u0000-\u001f\u007f-\u009f]/g, "\uFFFD");
 }
 
+// A generous ceiling on how many packages one run will look up. A real
+// monorepo lands well under this; a hostile or broken manifest with a huge
+// dependency list should not turn a scan into an unbounded flood of registry
+// requests. When the ceiling is hit, the overflow is reported, never dropped
+// silently.
+export const MAX_PACKAGES = 2000;
+
+/** Bound the work: keep the first `max`, report how many overflow. */
+export function capDeps(deps, max = MAX_PACKAGES) {
+  const overflow = deps.length - max;
+  return overflow > 0 ? { toCheck: deps.slice(0, max), overflow } : { toCheck: deps, overflow: 0 };
+}
+
 /* --------------------------- file discovery --------------------------- */
 
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".next", "coverage", "venv", ".venv", "__pycache__", "vendor", ".cache"]);
@@ -284,11 +297,17 @@ async function main() {
     process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.map(safeText).join(", ")}, so those files were skipped.\n`));
   }
 
-  if (!opts.json && process.stderr.isTTY) {
-    process.stderr.write(c.dim(`  Checking ${deps.length} package${deps.length === 1 ? "" : "s"} against npm and PyPI…\r`));
+  // Bound the work. Anything past the ceiling is reported, not silently dropped.
+  const { toCheck, overflow } = capDeps(deps);
+  if (overflow > 0 && !opts.json) {
+    process.stderr.write(c.yellow(`  Note: ${deps.length} dependencies found; checking the first ${MAX_PACKAGES}. Split this project to check the remaining ${overflow}.\n`));
   }
 
-  const results = await checkAll(deps, {
+  if (!opts.json && process.stderr.isTTY) {
+    process.stderr.write(c.dim(`  Checking ${toCheck.length} package${toCheck.length === 1 ? "" : "s"} against npm and PyPI…\r`));
+  }
+
+  const results = await checkAll(toCheck, {
     onProgress: (done, total) => {
       if (!opts.json && process.stderr.isTTY) {
         process.stderr.write(c.dim(`  Checking ${done}/${total}…              \r`));
@@ -301,6 +320,7 @@ async function main() {
     console.log(JSON.stringify({
       packages: results.length,
       unreadable: unreadable.length ? unreadable : undefined,
+      notChecked: overflow > 0 ? overflow : undefined,
       results: results.map(r => ({
         name: r.name, ecosystem: r.ecosystem, level: r.level,
         title: r.title || null, detail: r.detail || null, source: r.source || null, file: r.file || null

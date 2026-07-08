@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.2] - 2026-07-09
+
+### Security
+
+- Bounded the work per run at 2000 unique packages. A hostile or broken manifest with an enormous dependency list can no longer turn a scan into an unbounded flood of registry requests. The overflow count is reported in both the human summary and the `--json` output (`notChecked`), never dropped silently.
+- Defense in depth in the browser tool: the "view" link's URL and every interpolated value in a result row are now HTML-escaped, so a rendering change could never reopen an injection path even though names are already validated before they get that far. External links now carry `rel="noopener noreferrer"`.
+
+### Notes
+
+This release followed an offensive-security pass. Confirmed with proof-of-concept inputs and locked in with regression tests: no catastrophic-backtracking (ReDoS) in any parser (package.json, requirements.txt, pyproject.toml, source imports, name validation) even at 200k-character inputs; no prototype pollution through crafted `__proto__` or `constructor` keys; and no terminal-escape injection through any verdict message (the package name reaches the terminal only through the sanitized column).
+
 ## [1.5.1] - 2026-07-09
 
 ### Added

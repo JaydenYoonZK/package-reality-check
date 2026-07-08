@@ -3,9 +3,19 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseArgs, collectDeps, render, makeColor, safeText } from "../bin/cli.mjs";
+import { parseArgs, collectDeps, render, makeColor, safeText, capDeps, MAX_PACKAGES } from "../bin/cli.mjs";
 
 const noColor = makeColor(false);
+
+test("capDeps bounds the request count and reports the overflow", () => {
+  const few = Array.from({ length: 10 }, (_, i) => ({ name: `p${i}`, ecosystem: "npm" }));
+  assert.deepEqual(capDeps(few), { toCheck: few, overflow: 0 });
+
+  const many = Array.from({ length: MAX_PACKAGES + 25 }, (_, i) => ({ name: `p${i}`, ecosystem: "npm" }));
+  const capped = capDeps(many);
+  assert.equal(capped.toCheck.length, MAX_PACKAGES, "never checks more than the ceiling");
+  assert.equal(capped.overflow, 25, "overflow is reported, not dropped silently");
+});
 
 test("safeText strips terminal control characters from untrusted names", () => {
   const ESC = String.fromCharCode(27), BEL = String.fromCharCode(7);
