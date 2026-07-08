@@ -3,6 +3,19 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2026-07-08
+
+### Added
+
+- A zero-dependency command-line interface. Run `npx github:JaydenYoonZK/package-reality-check` in a project to scan its package.json and requirements.txt against the live npm and PyPI registries, with `--include-code` to also scan source imports.
+- CI integration: the CLI exits non-zero when a dependency cannot be trusted, tunable with `--fail-on phantom|danger|warn|never`. Includes `--json` output, `--quiet`, and color control.
+- A shared registry lookup module (`docs/registry.js`) with request timeouts and bounded retries, so a real package is never mislabeled because of one dropped request.
+- 14 new tests covering the registry layer (mocked, offline) and the CLI's parsing, file discovery, and rendering, bringing the suite to 29.
+
+### Notes
+
+- The CLI has no runtime dependencies. A supply-chain tool should not itself be a supply-chain risk.
+
 ## [1.2.0] - 2026-07-07
 
 ### Added
@@ -46,6 +59,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.3.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.0
 [1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0
 [1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
 [1.0.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.0.0
