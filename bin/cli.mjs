@@ -11,7 +11,7 @@
  * Zero runtime dependencies. A supply-chain tool must not be one.
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, realpathSync } from "node:fs";
 import { join, resolve, relative, extname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parsePackageJson, parseRequirements, parseJsImports, parsePyImports } from "../docs/checker.js";
@@ -270,7 +270,16 @@ async function main() {
   process.exit(fail ? 1 : 0);
 }
 
-const invokedDirectly = process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href;
-if (invokedDirectly || process.env.PRC_RUN === "1") {
+// Run main() only when invoked as a command, not when imported by tests.
+// npm installs bins as symlinks, so compare real paths, not raw argv.
+function isEntryPoint() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
+  } catch {
+    return false;
+  }
+}
+if (isEntryPoint() || process.env.PRC_RUN === "1") {
   main().catch((e) => { console.error("Unexpected error:", e?.message || e); process.exit(2); });
 }
