@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.1] - 2026-07-08
+
+### Fixed
+
+- The CLI did nothing and exited 0 when run as an installed command (via `npx` or a `node_modules/.bin` shim), because npm installs bins as symlinks and the entry-point check compared unresolved paths. It now resolves symlinks, so the installed command runs correctly.
+
 ## [1.3.0] - 2026-07-08
 
 ### Added
@@ -59,6 +65,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.3.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.1
 [1.3.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.0
 [1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0
 [1.1.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.1.0
