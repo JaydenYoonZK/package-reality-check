@@ -162,12 +162,42 @@ function dedupe(list) {
   return out;
 }
 
+/**
+ * Given a package.json dependency name and version spec, return the npm
+ * registry name to check, or null when the dependency does not come from
+ * the registry (a local path, workspace, git, or tarball reference) and so
+ * must not be looked up. Resolves `npm:` aliases to their real target.
+ *
+ * A real registry version spec (semver, range, tag, or "*") never contains
+ * a protocol prefix or a slash, which makes the non-registry cases easy to
+ * exclude and keeps monorepos from lighting up with false phantoms.
+ */
+export function resolveNpmDep(name, spec) {
+  const s = String(spec ?? "").trim();
+  if (s.startsWith("npm:")) {
+    let target = s.slice(4);
+    if (target.startsWith("@")) {
+      const at = target.indexOf("@", 1);
+      target = at === -1 ? target : target.slice(0, at);
+    } else {
+      const at = target.indexOf("@");
+      target = at <= 0 ? target : target.slice(0, at);
+    }
+    return target || null;
+  }
+  if (/^(file:|link:|workspace:|portal:|git\+|git:|github:|gitlab:|bitbucket:|https?:|ssh:|patch:)/i.test(s)) return null;
+  if (s.includes("/")) return null; // local path or "owner/repo" github shorthand
+  return name;
+}
+
 export function parsePackageJson(text) {
   const pkg = JSON.parse(text);
   const out = [];
   for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
     for (const [name, spec] of Object.entries(pkg[field] ?? {})) {
-      out.push({ name, ecosystem: "npm", spec, source: field });
+      const target = resolveNpmDep(name, spec);
+      if (!target) continue;
+      out.push({ name: target, ecosystem: "npm", spec, source: field, ...(target !== name ? { alias: name } : {}) });
     }
   }
   return dedupe(out);
@@ -260,6 +290,10 @@ export function extract(text) {
 
 export const NEW_PACKAGE_DAYS = 120;
 export const LOW_DOWNLOADS = 500;
+// Thresholds above which a package is considered established, so a
+// resemblance to a popular name is treated as coincidence, not a typosquat.
+export const ESTABLISHED_DOWNLOADS = 20000;
+export const ESTABLISHED_DAYS = 365;
 
 const OTHER_ECO = { npm: "PyPI", pypi: "npm" };
 
@@ -301,14 +335,25 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
   }
   if (facts.deprecated) flags.push("marked deprecated");
 
-  if (lookalike && flags.length) {
+  // An established package (well downloaded, or simply old) that happens to
+  // resemble a popular name is not a typosquat: it is a legitimate package
+  // that has earned its place. Only a name resembling a popular one AND
+  // looking fresh or obscure fits the squatting profile, so suppress the
+  // lookalike signal once a package is clearly established. This keeps real
+  // packages like "enquirer" or "serve" from being flagged as impostors.
+  const established =
+    (typeof facts.downloads === "number" && facts.downloads >= ESTABLISHED_DOWNLOADS) ||
+    (ageDays !== null && ageDays > ESTABLISHED_DAYS);
+  const suspiciousLookalike = lookalike && !established;
+
+  if (suspiciousLookalike && flags.length) {
     return {
       level: "danger",
       title: `Exists, but looks like a typo of "${lookalike}"`,
       detail: `This package is real but ${flags.join(", ")}. New lookalikes of popular names are the classic squatting pattern. Verify before installing.`
     };
   }
-  if (lookalike) {
+  if (suspiciousLookalike) {
     return {
       level: "warn",
       title: `One edit away from "${lookalike}"`,

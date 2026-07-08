@@ -3,6 +3,19 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] - 2026-07-08
+
+### Fixed
+
+- No more false phantoms on monorepos: dependencies that do not come from the registry (workspace, `file:`, `link:`, git, `github:owner/repo` shorthand, and tarball URLs) are now skipped instead of being looked up and wrongly flagged as invented.
+- `npm:` aliases are resolved to their real target, so `"x": "npm:real-package@^1"` checks `real-package`, not `x`.
+- Established packages that merely resemble a popular name (like `enquirer` near `inquirer`, or `serve` near `semver`) are no longer flagged as typosquats. A resemblance only matters when the package is also new or obscure, which is the actual squatting profile.
+- When every lookup fails, the CLI no longer claims success. It reports that nothing could be verified and exits with code 2, so a flaky network never reads as a clean bill of health in CI.
+
+### Added
+
+- `resolveNpmDep(name, spec)` in the engine, for reuse.
+
 ## [1.3.1] - 2026-07-08
 
 ### Fixed
@@ -65,6 +78,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.4.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.0
 [1.3.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.1
 [1.3.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.0
 [1.2.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.2.0

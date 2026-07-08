@@ -194,12 +194,19 @@ export function render(results, opts, c) {
   summaryBits.push(c.green(`${counts.ok} real`));
   lines.push("  " + summaryBits.join(c.dim("  ·  ")));
 
+  const checked = counts.ok + counts.phantom + counts.danger + counts.warn;
   if (bad) {
     lines.push("");
     lines.push("  " + c.red(c.bold(`✗ ${bad} package${bad === 1 ? "" : "s"} could not be trusted.`)) +
       c.dim(" Do not install until you have verified each one."));
-  } else if (counts.warn) {
-    lines.push("  " + c.yellow("All packages exist. A few are worth a quick look."));
+  } else if (checked === 0) {
+    // Everything errored: we verified nothing, so we must not claim success.
+    lines.push("");
+    lines.push("  " + c.yellow(c.bold("Could not reach the registries.")) +
+      c.dim(" Nothing was verified. Check your connection and try again."));
+  } else if (counts.warn || counts.error) {
+    const note = counts.error ? ` ${counts.error} could not be checked.` : "";
+    lines.push("  " + c.yellow("All checked packages exist. A few are worth a quick look." + note).trimEnd());
   } else {
     lines.push("  " + c.green(c.bold("✓ Every dependency is real and established.")));
   }
@@ -263,6 +270,11 @@ async function main() {
   } else {
     console.log(render(results, opts, c));
   }
+
+  // If nothing could be checked (every lookup errored), we verified nothing.
+  // Do not report success: exit 2 so CI treats it as an incomplete run.
+  const checked = results.filter(r => r.level !== "error").length;
+  if (checked === 0 && results.length > 0) process.exit(2);
 
   const threshold = RANK[opts.failOn] ?? 99;
   const worst = results.reduce((m, r) => Math.max(m, RANK[r.level] ?? -1), -1);
