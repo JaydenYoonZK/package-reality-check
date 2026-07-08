@@ -65,6 +65,24 @@ test("render highlights phantoms and the do-not-install banner", () => {
   assert.match(out, /1 phantom/);
 });
 
+test("render never claims success when every package errored", () => {
+  const out = render([
+    { name: "a", ecosystem: "npm", level: "error", title: "Could not check" },
+    { name: "b", ecosystem: "npm", level: "error", title: "Could not check" },
+  ], { quiet: false }, noColor);
+  assert.ok(!/Every dependency is real/.test(out), "must not claim success");
+  assert.match(out, /Could not reach the registries|Nothing was verified/);
+});
+
+test("render notes unchecked packages when some errored but others were fine", () => {
+  const out = render([
+    { name: "real", ecosystem: "npm", level: "ok" },
+    { name: "flaky", ecosystem: "npm", level: "error", title: "Could not check" },
+  ], { quiet: false }, noColor);
+  assert.match(out, /could not be checked/);
+  assert.ok(!/Every dependency is real/.test(out));
+});
+
 test("render quiet mode omits OK rows but keeps the summary", () => {
   const out = render([
     { name: "express", ecosystem: "npm", level: "ok" },

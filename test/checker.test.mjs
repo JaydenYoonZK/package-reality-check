@@ -1,9 +1,31 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  extract, parsePackageJson, parseRequirements, parseJsImports, parsePyImports,
+  extract, parsePackageJson, resolveNpmDep, parseRequirements, parseJsImports, parsePyImports,
   editDistance, lookalikeOf, normalizePypi, verdict, registryUrls
 } from "../docs/checker.js";
+
+test("resolveNpmDep skips non-registry deps and resolves npm aliases", () => {
+  assert.equal(resolveNpmDep("express", "^4.18.0"), "express");
+  assert.equal(resolveNpmDep("x", "*"), "x");
+  assert.equal(resolveNpmDep("x", ""), "x");
+  assert.equal(resolveNpmDep("my-local", "file:../my-local"), null);
+  assert.equal(resolveNpmDep("ws", "workspace:*"), null);
+  assert.equal(resolveNpmDep("g", "git+https://github.com/x/y.git"), null);
+  assert.equal(resolveNpmDep("g", "github:user/repo"), null);
+  assert.equal(resolveNpmDep("s", "expressjs/express"), null);
+  assert.equal(resolveNpmDep("t", "https://example.com/p.tgz"), null);
+  assert.equal(resolveNpmDep("aliased", "npm:real-package@^1.0.0"), "real-package");
+  assert.equal(resolveNpmDep("a", "npm:@vue/compiler@^3.0.0"), "@vue/compiler");
+});
+
+test("parsePackageJson skips workspace and local deps (no monorepo false phantoms)", () => {
+  const deps = parsePackageJson(JSON.stringify({ dependencies: {
+    express: "^4", "@my/pkg": "workspace:*", local: "file:../local", real: "npm:left-pad@^1"
+  }}));
+  const names = deps.map(d => d.name).sort();
+  assert.deepEqual(names, ["express", "left-pad"]);
+});
 
 test("parses package.json across dependency fields", () => {
   const deps = parsePackageJson(JSON.stringify({
@@ -118,6 +140,19 @@ test("verdict: warn for very new package", () => {
   const v = verdict("brand-new-thing", "npm",
     { exists: true, createdAt: "2026-06-01T00:00:00Z" }, now);
   assert.equal(v.level, "warn");
+});
+
+test("verdict: an established package resembling a popular name is not a typosquat", () => {
+  const now = Date.parse("2026-07-08");
+  // enquirer is near "inquirer" but old and hugely downloaded -> ok, not warn
+  const enquirer = verdict("enquirer", "npm", { exists: true, createdAt: "2017-01-01T00:00:00Z", downloads: 30000000 }, now);
+  assert.equal(enquirer.level, "ok");
+  // serve is near "semver" but established -> ok
+  const serve = verdict("serve", "npm", { exists: true, createdAt: "2016-01-01T00:00:00Z", downloads: 2000000 }, now);
+  assert.equal(serve.level, "ok");
+  // a fresh, low-download lookalike is still dangerous
+  const fresh = verdict("lodahs", "npm", { exists: true, createdAt: "2026-06-20T00:00:00Z", downloads: 12 }, now);
+  assert.equal(fresh.level, "danger");
 });
 
 test("verdict: ok for established package", () => {
