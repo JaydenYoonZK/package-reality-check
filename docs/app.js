@@ -54,7 +54,7 @@ async function run() {
     results.hidden = false;
     kindNote.textContent = kind === "empty"
       ? "Nothing to check yet."
-      : "Could not find any dependencies in that input. Paste a package.json, a requirements.txt, or code with imports.";
+      : "Could not find any dependencies in that input. Paste a package.json, a requirements.txt, a pyproject.toml, or code with imports.";
     progressWrap.hidden = true;
     return;
   }

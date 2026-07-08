@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      # Zero dependencies: nothing to install. The test suite is fully
+      # mocked and needs no network.
+      - run: npm test
+      # Smoke-test the CLI entry point itself.
+      - run: node bin/cli.mjs --help
+      - run: node bin/cli.mjs --version

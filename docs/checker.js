@@ -128,26 +128,37 @@ export function isValidPackageName(name, ecosystem) {
   return NAME_SEGMENT.test(s);
 }
 
-/** Levenshtein distance with early exit above `max`. */
+/**
+ * Optimal string alignment (restricted Damerau-Levenshtein) distance with an
+ * early exit above `max`. Counts insert, delete, substitute, and, crucially,
+ * an adjacent transposition as ONE edit. Plain Levenshtein scores a swap as
+ * two edits, which let the most common real-world typo (two keys hit in the
+ * wrong order: "raect", "veu") slip past the tight limits used for short
+ * names. Typosquatters know this pattern better than anyone.
+ */
 export function editDistance(a, b, max = 3) {
   if (Math.abs(a.length - b.length) > max) return max + 1;
-  const prev = new Array(b.length + 1);
-  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  let prev2 = null;                                        // row i-2, for transpositions
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
   for (let i = 1; i <= a.length; i++) {
-    let diag = prev[0];
-    prev[0] = i;
-    let rowMin = prev[0];
+    const cur = new Array(b.length + 1);
+    cur[0] = i;
+    let rowMin = i;
     for (let j = 1; j <= b.length; j++) {
-      const tmp = prev[j];
-      prev[j] = Math.min(
+      let d = Math.min(
         prev[j] + 1,
-        prev[j - 1] + 1,
-        diag + (a[i - 1] === b[j - 1] ? 0 : 1)
+        cur[j - 1] + 1,
+        prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
       );
-      diag = tmp;
-      if (prev[j] < rowMin) rowMin = prev[j];
+      if (prev2 && i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d = Math.min(d, prev2[j - 2] + 1);                 // adjacent swap costs 1
+      }
+      cur[j] = d;
+      if (d < rowMin) rowMin = d;
     }
     if (rowMin > max) return max + 1;
+    prev2 = prev;
+    prev = cur;
   }
   return prev[b.length];
 }
@@ -258,6 +269,72 @@ export function parseRequirements(text) {
 // where \s overlapped both quantifiers and produced catastrophic backtracking
 // (a file with `import` + whitespace + `from` and no quote could hang forever).
 // A negated class with a single bounded quantifier cannot backtrack that way.
+/**
+ * Extract PyPI dependencies from a pyproject.toml. Handles the three layouts
+ * seen in real projects, without needing a TOML library:
+ *   [project]                        dependencies = ["requests>=2.31", ...]   (PEP 621)
+ *   [project.optional-dependencies]  dev = ["pytest", ...]
+ *   [build-system]                   requires = ["setuptools>=61", ...]
+ *   [tool.poetry.dependencies]       requests = "^2.31"                        (Poetry)
+ *   [tool.poetry.group.X.dependencies], [tool.poetry.dev-dependencies]
+ * A small character scanner tracks quotes and bracket depth so that brackets
+ * inside requirement strings ("uvicorn[standard]>=0.29") and # comments are
+ * handled correctly. Requirement strings reuse the requirements.txt parser.
+ */
+export function parsePyproject(text) {
+  const out = [];
+  const push = (reqLine) => {
+    for (const d of parseRequirements(reqLine)) out.push({ ...d, source: "pyproject" });
+  };
+
+  let table = "";
+  let depth = 0;            // bracket depth of an open array value
+  let collecting = false;   // inside an array whose strings are requirements
+  const POETRY_DEPS = /^tool\.poetry(\.group\.[A-Za-z0-9._-]+)?\.(dev-)?dependencies$/;
+
+  for (const raw of String(text).split(/\r?\n/)) {
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+
+    // A table header only counts outside an open array.
+    if (depth === 0 && !collecting) {
+      const h = trimmed.match(/^\[\[?\s*([^\]]+?)\s*\]\]?$/);
+      if (h) { table = h[1].replace(/["']/g, ""); continue; }
+    }
+
+    // Decide whether an array starting on this line holds requirement strings.
+    if (depth === 0) {
+      const key = trimmed.match(/^("?)([A-Za-z0-9._-]+)\1\s*=\s*(.*)$/);
+      if (key) {
+        const wantArray =
+          (table === "project" && key[2] === "dependencies") ||
+          (table === "build-system" && key[2] === "requires") ||
+          table === "project.optional-dependencies";
+        if (wantArray && key[3].startsWith("[")) collecting = true;
+        else if (POETRY_DEPS.test(table) && key[2].toLowerCase() !== "python") {
+          out.push({ name: key[2], ecosystem: "pypi", spec: "", source: "pyproject" });
+          continue; // a Poetry value is a version or inline table, not a requirement string
+        }
+      }
+    }
+
+    // Scan the line: collect quoted strings, track depth, stop at comments.
+    let inStr = false, quote = "", buf = "";
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw[i];
+      if (inStr) {
+        if (ch === "\\" && quote === '"') { buf += raw[++i] ?? ""; continue; }
+        if (ch === quote) { inStr = false; if (collecting && depth > 0) push(buf); buf = ""; }
+        else buf += ch;
+      } else if (ch === '"' || ch === "'") { inStr = true; quote = ch; buf = ""; }
+      else if (ch === "#") break;
+      else if (ch === "[") depth++;
+      else if (ch === "]") { depth = Math.max(0, depth - 1); if (depth === 0) collecting = false; }
+    }
+  }
+  return dedupe(out);
+}
+
 const JS_IMPORT = /(?<![\w.$])(?:(?:import|export)\b[^"']{0,4000}?\bfrom\s*|import\b\s*\(\s*|require\b\s*\(\s*|import\b\s*)["']([^"']+)["']/g;
 const PY_IMPORT = /^[ \t]*(?:import[ \t]+([\w.]+(?:[ \t]*,[ \t]*[\w.]+)*)|from[ \t]+([\w.]+)[ \t]+import)/gm;
 
@@ -301,6 +378,12 @@ export function extract(text) {
       const deps = parsePackageJson(trimmed);
       return { kind: "package.json", deps };
     } catch { /* fall through */ }
+  }
+
+  // pyproject.toml: recognized by its well-known tables.
+  if (/^\s*\[(project(\.|\])|tool\.poetry|build-system)/m.test(text)) {
+    const deps = parsePyproject(text);
+    if (deps.length) return { kind: "pyproject.toml", deps };
   }
 
   // Decide which languages are plausibly present before parsing, so a
@@ -405,22 +488,24 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
   }
   if (facts.deprecated) flags.push("marked deprecated");
 
-  // An established package (well downloaded, or simply old) that happens to
-  // resemble a popular name is not a typosquat: it is a legitimate package
-  // that has earned its place. Only a name resembling a popular one AND
-  // looking fresh or obscure fits the squatting profile, so suppress the
-  // lookalike signal once a package is clearly established. This keeps real
-  // packages like "enquirer" or "serve" from being flagged as impostors.
+  // An established package that happens to resemble a popular name is not a
+  // typosquat: it is a legitimate package that has earned its place. This
+  // keeps real packages like "enquirer" or "serve" from being flagged as
+  // impostors. Heavy downloads always establish. Age alone establishes only
+  // when downloads are not known to be tiny: a name one edit from a popular
+  // package that has sat for years with almost no use fits the profile of a
+  // parked typosquat, not an adopted library, so it stays flagged.
+  const tinyDownloads = typeof facts.downloads === "number" && facts.downloads < LOW_DOWNLOADS;
   const established =
     (typeof facts.downloads === "number" && facts.downloads >= ESTABLISHED_DOWNLOADS) ||
-    (ageDays !== null && ageDays > ESTABLISHED_DAYS);
+    (ageDays !== null && ageDays > ESTABLISHED_DAYS && !tinyDownloads);
   const suspiciousLookalike = lookalike && !established;
 
   if (suspiciousLookalike && flags.length) {
     return {
       level: "danger",
       title: `Exists, but looks like a typo of "${lookalike}"`,
-      detail: `This package is real but ${flags.join(", ")}. New lookalikes of popular names are the classic squatting pattern. Verify before installing.`
+      detail: `This package is real but ${flags.join(", ")}. Obscure lookalikes of popular names are the classic squatting pattern. Verify before installing.`
     };
   }
   if (suspiciousLookalike) {

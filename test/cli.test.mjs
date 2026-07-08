@@ -32,6 +32,22 @@ test("parseArgs defaults and flags", () => {
   assert.equal(parseArgs(["--fail-on=warn"]).failOn, "warn");
   assert.equal(parseArgs(["./myproj"]).path, "./myproj");
   assert.equal(parseArgs(["--bogus"]).badFlag, "--bogus");
+  assert.equal(parseArgs(["--fail-on"]).failOn, undefined, "missing value is detectable");
+  assert.equal(parseArgs(["a", "b"]).extraArg, "b", "extra positional is surfaced, not swallowed");
+});
+
+test("collectDeps reads pyproject.toml", () => {
+  const dir = mkdtempSync(join(tmpdir(), "prc-"));
+  try {
+    writeFileSync(join(dir, "pyproject.toml"), [
+      '[project]',
+      'dependencies = ["requests>=2.31", "flask"]',
+    ].join("\n"));
+    const { deps, manifests } = collectDeps(dir, false);
+    assert.equal(manifests, 1);
+    assert.deepEqual(deps.map(d => d.name), ["requests", "flask"]);
+    assert.ok(deps.every(d => d.ecosystem === "pypi"));
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("collectDeps reads package.json and requirements, dedupes, tags files", () => {
