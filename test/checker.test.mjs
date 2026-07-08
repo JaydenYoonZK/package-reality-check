@@ -314,6 +314,61 @@ test("verdict: ok for established package", () => {
   assert.equal(v.level, "ok");
 });
 
+// --- Boundary-value analysis: lock every threshold transition in place ---
+
+const NOW_BVA = Date.UTC(2026, 6, 9);
+const daysAgo = (n) => new Date(NOW_BVA - n * 86400000).toISOString();
+const lvl = (name, facts) => verdict(name, "npm", facts, NOW_BVA).level;
+const SAFE = "totally-unique-safe-name-zzz"; // no lookalike, isolates age/download flags
+
+test("boundary: NEW_PACKAGE_DAYS is inclusive at 120", () => {
+  assert.equal(lvl(SAFE, { exists: true, createdAt: daysAgo(119), downloads: 9e9 }), "warn");
+  assert.equal(lvl(SAFE, { exists: true, createdAt: daysAgo(120), downloads: 9e9 }), "warn"); // 120 still new
+  assert.equal(lvl(SAFE, { exists: true, createdAt: daysAgo(121), downloads: 9e9 }), "ok");   // 121 is not
+});
+
+test("boundary: LOW_DOWNLOADS flags strictly below 500", () => {
+  assert.equal(lvl(SAFE, { exists: true, createdAt: daysAgo(200), downloads: 499 }), "warn");
+  assert.equal(lvl(SAFE, { exists: true, createdAt: daysAgo(200), downloads: 500 }), "ok"); // 500 is fine
+});
+
+test("boundary: ESTABLISHED_DOWNLOADS suppresses a lookalike at exactly 20000", () => {
+  assert.equal(lvl("raect", { exists: true, createdAt: daysAgo(200), downloads: 19999 }), "warn");
+  assert.equal(lvl("raect", { exists: true, createdAt: daysAgo(200), downloads: 20000 }), "ok");
+});
+
+test("boundary: ESTABLISHED_DAYS establishes a lookalike only above 365", () => {
+  assert.equal(lvl("raect", { exists: true, createdAt: daysAgo(365) }), "warn"); // 365 not yet established
+  assert.equal(lvl("raect", { exists: true, createdAt: daysAgo(366) }), "ok");   // 366 is
+});
+
+test("verdict: a mid-popularity lookalike with no flags is a plain warn", () => {
+  // raect, 200 days old (not new), 5000 downloads (not low, not established),
+  // age <= 365 (not established by age): no flags, so a plain 'one edit away' warn.
+  const v = verdict("raect", "npm", { exists: true, createdAt: daysAgo(200), downloads: 5000 }, NOW_BVA);
+  assert.equal(v.level, "warn");
+  assert.match(v.title, /One edit away from "react"/);
+});
+
+test("verdict: ok detail renders age in days for a sub-year established package", () => {
+  const v = verdict(SAFE, "npm", { exists: true, createdAt: daysAgo(200), downloads: 9e9 }, NOW_BVA);
+  assert.equal(v.level, "ok");
+  assert.equal(v.detail, "registered 200 days ago");
+});
+
+test("parsePackageJson throws on a non-object top level", () => {
+  for (const bad of ["null", "[1,2,3]", '"a string"', "42", "true"]) {
+    assert.throws(() => parsePackageJson(bad), /not a JSON object/, `${bad} should throw`);
+  }
+  assert.doesNotThrow(() => parsePackageJson("{}"));
+});
+
+test("extract() returns unknown for input that is not any recognized format", () => {
+  const r = extract("the quick brown fox jumps over the lazy dog");
+  assert.equal(r.kind, "unknown");
+  assert.deepEqual(r.deps, []);
+});
+
 test("verdict: ok-detail age reads naturally (singular year, no NaN)", () => {
   const now = Date.parse("2026-07-08");
   // ~1.5 years old -> "1 year", not "1 years"

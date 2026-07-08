@@ -1,6 +1,6 @@
 {
   "name": "package-reality-check",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Check that your dependencies actually exist and are plausibly legitimate. Catches AI-hallucinated (slopsquatted) packages and fresh typosquats before you install them. Browser tool and zero-dependency CLI.",
   "type": "module",
   "bin": {
@@ -18,7 +18,8 @@
   "scripts": {
     "test": "node --test",
     "start": "node bin/cli.mjs",
-    "serve": "python3 -m http.server 8322 -d docs"
+    "serve": "python3 -m http.server 8322 -d docs",
+    "coverage": "node --test --experimental-test-coverage"
   },
   "keywords": [
     "supply-chain-security",

@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.3] - 2026-07-09
+
+### Fixed
+
+- A non-404 error from the npm `latest` endpoint (a `403`, a proxy error page, anything that was not a clean success) was treated as proof the package exists. Existence now requires a successful response; any other status falls through to the authoritative full-document check and, failing that, is reported as an error rather than a confident verdict. Found while writing a boundary test for the error path.
+
+### Changed
+
+- Test suite expanded from 68 to 79 tests, driven by a coverage measurement. Added boundary-value tests that pin every verdict threshold (new-package at 120 days, low-downloads at 500, established at 20000 downloads and 365 days) one unit either side of the line, tests for the previously-uncovered verdict and registry-error branches, and `npm run coverage`. The engine modules are now at 100% line coverage.
+- Registry tests are now hermetic: an un-mocked network call fails loudly instead of silently reaching the internet, and the real `fetch` is restored after each test, so the suite is order-independent.
+
 ## [1.5.2] - 2026-07-09
 
 ### Security

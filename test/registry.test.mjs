@@ -1,6 +1,16 @@
-import { test } from "node:test";
+import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { checkAll, fetchFacts } from "../docs/registry.js";
+
+// Test isolation: every test here must mock fetch. Before each test, install a
+// fetch that throws loudly, so a test that forgets to stub fails fast instead
+// of silently hitting the real network (which would make the suite flaky and
+// order-dependent). Restore the real fetch afterward so nothing leaks out.
+const realFetch = globalThis.fetch;
+beforeEach(() => {
+  globalThis.fetch = () => { throw new Error("test made an un-mocked network call"); };
+});
+afterEach(() => { globalThis.fetch = realFetch; });
 
 // Stub global fetch so these tests are deterministic and offline.
 function stubFetch(routes) {
@@ -160,4 +170,37 @@ test("checkAll: surfaces a hard network failure as an error verdict, not a phant
   globalThis.fetch = async () => { throw new Error("ECONNRESET"); };
   const out = await checkAll([{ name: "x", ecosystem: "npm" }], { now: NOW });
   assert.equal(out[0].level, "error");
+});
+
+test("fetchFacts npm: a non-404 error (403) is not treated as existence", async () => {
+  // A 403 on /latest must not read as 'exists'. It falls through to the full
+  // document, which also 403s, so the honest answer is an error, not a phantom
+  // and definitely not a confident OK.
+  globalThis.fetch = async () => ({ status: 403, ok: false, json: async () => ({}) });
+  const f = await fetchFacts({ name: "blocked-name", ecosystem: "npm" });
+  assert.notEqual(f.exists, true, "a 403 must never confirm existence");
+  assert.match(f.error, /registry answered 403/);
+});
+
+test("fetchFacts pypi: a non-404 error (403) is an error verdict, not a phantom", async () => {
+  globalThis.fetch = async () => ({ status: 403, ok: false, json: async () => ({}) });
+  const f = await fetchFacts({ name: "some-pypi-pkg", ecosystem: "pypi" });
+  assert.notEqual(f.exists, true);
+  assert.match(f.error, /registry answered 403/);
+});
+
+test("fetchFacts pypi: a 404 is a phantom, and reports foundIn when the name is on npm", async () => {
+  // pypi 404 for the package, but the cross-ecosystem npm check finds it.
+  stubFetch([
+    ["registry.npmjs.org/left-pad", () => ({ body: { "dist-tags": { latest: "1.3.0" } } })],
+  ]);
+  const found = await fetchFacts({ name: "left-pad", ecosystem: "pypi" });
+  assert.equal(found.exists, false);
+  assert.equal(found.foundIn, "other");
+
+  // pypi 404 and nowhere else either -> a pure phantom.
+  stubFetch([]);
+  const pure = await fetchFacts({ name: "totally-made-up-pypi-zzz", ecosystem: "pypi" });
+  assert.equal(pure.exists, false);
+  assert.equal(pure.foundIn, null);
 });
