@@ -110,6 +110,16 @@ test("parsePackageJson skips workspace and local deps (no monorepo false phantom
   assert.deepEqual(names, ["express", "left-pad"]);
 });
 
+test("parsePackageJson does not pollute Object.prototype via crafted keys", () => {
+  const mal = JSON.stringify({ dependencies: { "__proto__": "1.0.0", "constructor": "1.0.0", "real": "^1" } });
+  parsePackageJson(mal);
+  assert.equal(({}).polluted, undefined);
+  assert.equal(Object.prototype.polluted, undefined);
+  // and a crafted __proto__ value object must not become the prototype
+  parsePackageJson('{"dependencies":{"__proto__":{"polluted":"x"}}}');
+  assert.equal(({}).polluted, undefined, "no prototype pollution from a nested __proto__ value");
+});
+
 test("parsePackageJson ignores a malformed dependency block (no junk names)", () => {
   // A dependencies field that is a string or array is malformed. Object.entries
   // would otherwise turn it into deps named "0", "1", ... Each must yield none.

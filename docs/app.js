@@ -35,13 +35,16 @@ const LEVEL_LABEL = {
 const LEVEL_ORDER = { phantom: 0, danger: 1, warn: 2, error: 3, ok: 4 };
 
 function rowHtml(dep, v, urls) {
+  // Everything interpolated here is escaped. dep.name and the page URL derive
+  // from untrusted input, and level/ecosystem are ours, but all pass through
+  // esc() so a rendering change can never reopen an injection path.
   const level = v?.level ?? "checking";
-  const badge = `<span class="verdict ${level}">${LEVEL_LABEL[level] ?? level}</span>`;
+  const badge = `<span class="verdict ${esc(level)}">${esc(LEVEL_LABEL[level] ?? level)}</span>`;
   const title = v?.title ? `<strong>${esc(v.title)}</strong><br>` : "";
   const detail = v ? `${title}<span class="detail">${esc(v.detail || "")}</span>` : `<span class="detail">checking registry...</span>`;
   const link = v?.level && v.level !== "phantom" && v.level !== "checking"
-    ? ` <a href="${urls.page}" rel="noopener" target="_blank">view</a>` : "";
-  return `<td class="pkg">${esc(dep.name)}<div class="eco">${dep.ecosystem}${dep.source ? " · " + esc(dep.source) : ""}</div></td>
+    ? ` <a href="${esc(urls.page)}" rel="noopener noreferrer" target="_blank">view</a>` : "";
+  return `<td class="pkg">${esc(dep.name)}<div class="eco">${esc(dep.ecosystem)}${dep.source ? " · " + esc(dep.source) : ""}</div></td>
     <td>${badge}</td><td>${detail}${link}</td>`;
 }
 

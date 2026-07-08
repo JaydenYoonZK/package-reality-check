@@ -135,6 +135,7 @@ npm test
 
 - Only npm and PyPI. Other ecosystems are tracked in [issues](https://github.com/JaydenYoonZK/package-reality-check/issues).
 - It checks the dependencies you declare, not the resolved lockfile tree. Transitive dependencies are your package manager's territory; this tool guards the moment a name enters your manifest.
+- A single run checks at most 2000 unique packages, so a huge or hostile manifest cannot turn a scan into an unbounded flood of registry requests. The overflow count is reported, never dropped silently.
 - Internal/private packages will show as PHANTOM, because the tool can only see public registries. That is also a nudge to protect those names.
 - Edit distance cannot read intent; occasional legitimate near-name packages will ask you for thirty seconds of judgment.
 - Corporate proxies: Node's built-in fetch does not read `HTTP_PROXY`/`HTTPS_PROXY` by default. On Node 24+ set `NODE_USE_ENV_PROXY=1`; on older versions run it from a network that can reach the registries directly.
