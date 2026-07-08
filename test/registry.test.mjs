@@ -110,6 +110,26 @@ test("fetchFacts npm: a prerelease-only package (no latest tag) is not a phantom
   assert.equal(f.createdAt, "2026-05-01T00:00:00Z");
 });
 
+test("fetchFacts: an invalid package name is rejected without any network call", async () => {
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; return { status: 404, ok: false, json: async () => ({}) }; };
+  const f = await fetchFacts({ name: "../../-/npm/v1/security/x", ecosystem: "npm" });
+  assert.equal(f.invalid, true);
+  assert.equal(f.exists, false);
+  assert.equal(calls, 0, "a hostile name must never reach the network");
+});
+
+test("fetchFacts npm: detects a security-holding placeholder from /latest", async () => {
+  globalThis.fetch = async (url) => {
+    if (url.endsWith("/latest")) return { status: 200, ok: true, json: async () => ({ version: "0.0.1-security", description: "security holding package" }) };
+    if (url.includes("api.npmjs.org/downloads")) return { status: 200, ok: true, json: async () => ({ downloads: 333 }) };
+    return { status: 200, ok: true, json: async () => ({ time: { created: "2018-01-01T00:00:00Z" }, "dist-tags": { latest: "0.0.1-security" }, versions: {} }) };
+  };
+  const f = await fetchFacts({ name: "flatmap-stream", ecosystem: "npm" });
+  assert.equal(f.exists, true);
+  assert.equal(f.securityHolding, true);
+});
+
 test("fetchFacts npm: deprecation is read from the latest manifest", async () => {
   globalThis.fetch = async (url) => {
     if (url.endsWith("/latest")) return { status: 200, ok: true, json: async () => ({ version: "1.0.0", deprecated: "no longer maintained" }) };

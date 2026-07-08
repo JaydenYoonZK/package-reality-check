@@ -1,4 +1,5 @@
 import { extract, verdict, registryUrls } from "./checker.js";
+import { fetchFacts } from "./registry.js";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -13,56 +14,15 @@ const checkBtn = $("check");
 const MAX_PACKAGES = 200;
 const CONCURRENCY = 6;
 
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Escape for HTML text and double-quoted attributes (covers & < > " ').
+const esc = (s) => String(s)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-// Does this name exist in the other ecosystem? Used to catch a wrong-eco
-// guess on a bare list before we wrongly call a real package a phantom.
-async function existsInOther(dep) {
-  const other = dep.ecosystem === "npm" ? "pypi" : "npm";
-  try {
-    const res = await fetch(registryUrls(dep.name, other).api, { headers: { Accept: "application/json" } });
-    if (res.status === 404) return false;
-    if (!res.ok) return false;
-    const json = await res.json();
-    return !(json && json.error);
-  } catch { return false; }
-}
-
-async function factsFor(dep) {
-  const urls = registryUrls(dep.name, dep.ecosystem);
-  try {
-    const res = await fetch(urls.api, { headers: { Accept: "application/json" } });
-    if (res.status === 404) {
-      return { exists: false, foundIn: (await existsInOther(dep)) ? "other" : null };
-    }
-    if (!res.ok) return { error: `registry answered ${res.status}` };
-    const json = await res.json();
-
-    if (dep.ecosystem === "npm") {
-      const createdAt = json.time?.created ?? null;
-      const latest = json["dist-tags"]?.latest;
-      const deprecated = Boolean(latest && json.versions?.[latest]?.deprecated);
-      let downloads = null;
-      try {
-        const d = await fetch(urls.downloads);
-        if (d.ok) downloads = (await d.json()).downloads ?? null;
-      } catch { /* downloads are optional */ }
-      return { exists: true, createdAt, downloads, deprecated };
-    }
-
-    // PyPI: earliest upload across all releases.
-    let earliest = null;
-    for (const files of Object.values(json.releases ?? {})) {
-      for (const f of files) {
-        const t = f.upload_time_iso_8601 || f.upload_time;
-        if (t && (!earliest || t < earliest)) earliest = t;
-      }
-    }
-    return { exists: true, createdAt: earliest, downloads: null, deprecated: false };
-  } catch {
-    return { error: "network error" };
-  }
-}
+// The registry logic (light-then-full fetch, security-holding detection,
+// wrong-ecosystem check, name validation, timeouts and retries) lives in the
+// shared registry module, so the browser and the CLI stay identical. See
+// fetchFacts in registry.js.
 
 const LEVEL_LABEL = {
   phantom: "PHANTOM",
@@ -121,7 +81,7 @@ async function run() {
   async function worker() {
     while (queue.length) {
       const { dep, i } = queue.shift();
-      const facts = await factsFor(dep);
+      const facts = await fetchFacts(dep);
       const v = facts.error
         ? { level: "error", title: "Could not check", detail: facts.error + ". Try again in a moment." }
         : verdict(dep.name, dep.ecosystem, facts);
@@ -143,8 +103,8 @@ async function run() {
   const dangers = count("danger");
   const warns = count("warn");
   const chips = [];
-  if (phantoms) chips.push(`<span class="chip red"><strong>${phantoms}</strong> phantom (not in any registry)</span>`);
-  if (dangers) chips.push(`<span class="chip red"><strong>${dangers}</strong> dangerous lookalike${dangers === 1 ? "" : "s"}</span>`);
+  if (phantoms) chips.push(`<span class="chip red"><strong>${phantoms}</strong> phantom or invalid</span>`);
+  if (dangers) chips.push(`<span class="chip red"><strong>${dangers}</strong> dangerous</span>`);
   if (warns) chips.push(`<span class="chip amber"><strong>${warns}</strong> worth a closer look</span>`);
   if (!chips.length) chips.push(`<span class="chip ok"><strong>All ${list.length}</strong> packages check out</span>`);
   summary.innerHTML = chips.join("");
