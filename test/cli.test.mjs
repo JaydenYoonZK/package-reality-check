@@ -3,9 +3,25 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseArgs, collectDeps, render, makeColor } from "../bin/cli.mjs";
+import { parseArgs, collectDeps, render, makeColor, safeText } from "../bin/cli.mjs";
 
 const noColor = makeColor(false);
+
+test("safeText strips terminal control characters from untrusted names", () => {
+  const ESC = String.fromCharCode(27), BEL = String.fromCharCode(7);
+  const evil = "evil" + ESC + "[2J" + ESC + "]0;title" + BEL + "pkg";
+  const cleaned = safeText(evil);
+  assert.ok(!cleaned.includes(ESC), "ESC must be removed");
+  assert.ok(!cleaned.includes(BEL), "BEL must be removed");
+  assert.ok(cleaned.includes("evil") && cleaned.includes("pkg"), "printable text is kept");
+});
+
+test("render does not emit raw escape sequences from a crafted package name", () => {
+  const ESC = String.fromCharCode(27);
+  const out = render([{ name: "x" + ESC + "[31mINJECT", ecosystem: "npm", level: "phantom", title: "t" }],
+    { quiet: false }, noColor);
+  assert.ok(!out.includes(ESC), "no raw ESC in the rendered output");
+});
 
 test("parseArgs defaults and flags", () => {
   assert.deepEqual(parseArgs([]).failOn, "phantom");

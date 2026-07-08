@@ -3,6 +3,20 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.2] - 2026-07-08
+
+### Fixed
+
+- Large packages are no longer wrongly reported as uncheckable. A package with a long release history has a registry document of many megabytes (`@types/node` is about 11 MB), which could exceed the request timeout and read as "could not check". npm lookups now use the tiny `latest` manifest for existence and the download count to judge whether a package is established, and only fetch the full document for a creation date when a package is not already established (those are always small). Scoped packages like `@types/node` and `@babel/core` now resolve quickly and correctly.
+- Fixed catastrophic backtracking (a ReDoS) in the JavaScript import scanner used by `--include-code`. A source file with `import`, a long run of whitespace, and no closing quote could hang the tool. The pattern was rewritten to a bounded, non-overlapping form; pathological input now completes in milliseconds. As a bonus, property accesses such as `obj.require("x")` are no longer misread as imports.
+- Terminal escape sequences in a dependency name or file path are now stripped before display, so a crafted `package.json` cannot clear your screen, set the terminal title, or inject fake output when scanned. Machine (`--json`) output was already safe.
+- A malformed `package.json` whose top level is not an object, or whose dependency block is a string or array, is now rejected as unparseable instead of yielding junk package names or a false clean pass.
+- Corrected the age wording in a package's details ("1 year", not "1 years"; never "NaN days").
+
+### Changed
+
+- Source scanning now skips hidden directories (`.github`, `.vscode`, caches) as well as build and vendor directories.
+
 ## [1.4.1] - 2026-07-08
 
 ### Fixed

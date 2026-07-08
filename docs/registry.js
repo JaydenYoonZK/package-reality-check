@@ -8,7 +8,7 @@
  * risk itself.
  */
 
-import { registryUrls, verdict } from "./checker.js";
+import { registryUrls, verdict, ESTABLISHED_DOWNLOADS } from "./checker.js";
 
 const UA = "package-reality-check (+https://github.com/JaydenYoonZK/package-reality-check)";
 
@@ -20,7 +20,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  * timeouts, 5xx, 429) are retried with backoff so a real package is never
  * mislabeled because of one dropped request.
  */
-async function getJson(url, { timeoutMs = 12000, retries = 3 } = {}) {
+async function getJson(url, { timeoutMs = 20000, retries = 3 } = {}) {
   let lastErr = null;
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt > 0) await sleep(250 * attempt);
@@ -54,37 +54,75 @@ async function existsInOther(name, ecosystem) {
 export async function fetchFacts(dep) {
   const urls = registryUrls(dep.name, dep.ecosystem);
   try {
-    const r = await getJson(urls.api);
-    if (r.status === 404 || (r.json && r.json.error)) {
-      return { exists: false, foundIn: (await existsInOther(dep.name, dep.ecosystem)) ? "other" : null };
-    }
-    if (!r.ok || !r.json) return { error: `registry answered ${r.status}` };
-    const data = r.json;
-
-    if (dep.ecosystem === "npm") {
-      const createdAt = data.time?.created ?? null;
-      const latest = data["dist-tags"]?.latest;
-      const deprecated = Boolean(latest && data.versions?.[latest]?.deprecated);
-      let downloads = null;
-      try {
-        const d = await getJson(urls.downloads);
-        if (d.ok && d.json) downloads = d.json.downloads ?? null;
-      } catch { /* downloads optional */ }
-      return { exists: true, createdAt, downloads, deprecated };
-    }
-
-    // PyPI: earliest upload across all releases.
-    let earliest = null;
-    for (const files of Object.values(data.releases ?? {})) {
-      for (const f of files) {
-        const t = f.upload_time_iso_8601 || f.upload_time;
-        if (t && (!earliest || t < earliest)) earliest = t;
-      }
-    }
-    return { exists: true, createdAt: earliest, downloads: null, deprecated: false };
+    return dep.ecosystem === "npm" ? await fetchNpmFacts(dep, urls) : await fetchPypiFacts(dep, urls);
   } catch (e) {
     return { error: e.name === "AbortError" ? "request timed out" : "network error" };
   }
+}
+
+/**
+ * npm facts, fetched cheaply. The full registry document for a package with a
+ * long history can be many megabytes (@types/node is ~11 MB), which is slow
+ * and wasteful when all we need is existence, downloads, deprecation, and a
+ * creation date. So:
+ *   1. existence + deprecation come from the tiny /latest manifest,
+ *   2. the monthly download count (which the API serves for scoped names too)
+ *      tells us whether the package is already established,
+ *   3. the large full document is fetched only when we still need a creation
+ *      date, i.e. for packages that are NOT established by downloads. Those are
+ *      exactly the small, new, or obscure packages whose full document is tiny.
+ * A phantom is decided without ever paying for a big download.
+ */
+async function fetchNpmFacts(dep, urls) {
+  const latest = await getJson(urls.latest);
+  let exists = latest.status !== 404 && latest.json && !latest.json.error;
+  let deprecated = Boolean(exists && latest.json.deprecated);
+
+  let downloads = null;
+  try {
+    const d = await getJson(urls.downloads);
+    if (d.ok && d.json) downloads = d.json.downloads ?? null;
+  } catch { /* downloads optional */ }
+  const establishedByDownloads = typeof downloads === "number" && downloads >= ESTABLISHED_DOWNLOADS;
+
+  // Fetch the full document only when it can change the answer: to confirm a
+  // package that has no `latest` dist-tag (prerelease-only), or to read the
+  // creation date for a package we cannot yet call established.
+  let createdAt = null;
+  if (!exists || !establishedByDownloads) {
+    const full = await getJson(urls.api);
+    if (full.status === 404 || (full.json && full.json.error)) {
+      if (!exists) return { exists: false, foundIn: (await existsInOther(dep.name, dep.ecosystem)) ? "other" : null };
+    } else if (full.ok && full.json) {
+      exists = true;
+      createdAt = full.json.time?.created ?? null;
+      const lt = full.json["dist-tags"]?.latest;
+      if (lt && full.json.versions?.[lt]?.deprecated) deprecated = true;
+    } else if (!exists) {
+      return { error: `registry answered ${full.status}` };
+    }
+  }
+
+  if (!exists) return { exists: false, foundIn: (await existsInOther(dep.name, dep.ecosystem)) ? "other" : null };
+  return { exists: true, createdAt, downloads, deprecated };
+}
+
+/** PyPI facts: existence and the earliest upload across all releases (its age). */
+async function fetchPypiFacts(dep, urls) {
+  const r = await getJson(urls.api);
+  if (r.status === 404 || (r.json && r.json.error)) {
+    return { exists: false, foundIn: (await existsInOther(dep.name, dep.ecosystem)) ? "other" : null };
+  }
+  if (!r.ok || !r.json) return { error: `registry answered ${r.status}` };
+
+  let earliest = null;
+  for (const files of Object.values(r.json.releases ?? {})) {
+    for (const f of files) {
+      const t = f.upload_time_iso_8601 || f.upload_time;
+      if (t && (!earliest || t < earliest)) earliest = t;
+    }
+  }
+  return { exists: true, createdAt: earliest, downloads: null, deprecated: false };
 }
 
 /**

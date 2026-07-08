@@ -192,9 +192,20 @@ export function resolveNpmDep(name, spec) {
 
 export function parsePackageJson(text) {
   const pkg = JSON.parse(text);
+  // A package.json must be a JSON object. null, an array, or a bare scalar is
+  // not a valid manifest; throw so the caller can flag it, rather than
+  // silently reporting zero dependencies (a false clean bill of health).
+  if (pkg === null || typeof pkg !== "object" || Array.isArray(pkg)) {
+    throw new Error("package.json is not a JSON object");
+  }
   const out = [];
   for (const field of ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"]) {
-    for (const [name, spec] of Object.entries(pkg[field] ?? {})) {
+    const block = pkg[field];
+    // A dependency block must be a plain object of name -> spec. A malformed
+    // manifest that sets it to a string or array would otherwise yield junk
+    // names ("0", "1", ...) from Object.entries, so ignore anything else.
+    if (!block || typeof block !== "object" || Array.isArray(block)) continue;
+    for (const [name, spec] of Object.entries(block)) {
       const target = resolveNpmDep(name, spec);
       if (!target) continue;
       out.push({ name: target, ecosystem: "npm", spec, source: field, ...(target !== name ? { alias: name } : {}) });
@@ -217,7 +228,14 @@ export function parseRequirements(text) {
   return dedupe(out);
 }
 
-const JS_IMPORT = /(?:import\s+(?:[\w${},*\s]+\s+from\s+)?|import\s*\(\s*|require\s*\(\s*|export\s+(?:[\w${},*\s]+\s+)?from\s+)["']([^"']+)["']/g;
+// Matches `import X from "pkg"`, `import "pkg"`, `import("pkg")`, and
+// `require("pkg")`. The clause between `import`/`export` and `from` is a
+// BOUNDED, negated class ([^"'] can span lines but never a quote, capped at
+// 4000 chars). This is deliberate: an earlier version used [\w${},*\s]+\s+from,
+// where \s overlapped both quantifiers and produced catastrophic backtracking
+// (a file with `import` + whitespace + `from` and no quote could hang forever).
+// A negated class with a single bounded quantifier cannot backtrack that way.
+const JS_IMPORT = /(?<![\w.$])(?:(?:import|export)\b[^"']{0,4000}?\bfrom\s*|import\b\s*\(\s*|require\b\s*\(\s*|import\b\s*)["']([^"']+)["']/g;
 const PY_IMPORT = /^[ \t]*(?:import[ \t]+([\w.]+(?:[ \t]*,[ \t]*[\w.]+)*)|from[ \t]+([\w.]+)[ \t]+import)/gm;
 
 export function parseJsImports(code) {
@@ -297,6 +315,15 @@ export const ESTABLISHED_DAYS = 365;
 
 const OTHER_ECO = { npm: "PyPI", pypi: "npm" };
 
+/** "3 days" / "1 year" / "2 years", correctly singularized. Null-safe. */
+function humanAge(ageDays) {
+  if (ageDays === null || !Number.isFinite(ageDays)) return null;
+  const years = Math.floor(ageDays / 365);
+  if (years >= 1) return `${years} year${years === 1 ? "" : "s"}`;
+  const days = Math.max(0, ageDays);
+  return `${days} day${days === 1 ? "" : "s"}`;
+}
+
 /**
  * Compute a verdict from registry facts.
  * facts: { exists, createdAt?, downloads?, deprecated?, foundIn? }
@@ -327,8 +354,11 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
   const flags = [];
   let ageDays = null;
   if (facts.createdAt) {
-    ageDays = Math.floor((now - new Date(facts.createdAt).getTime()) / 86400000);
-    if (ageDays <= NEW_PACKAGE_DAYS) flags.push(`registered ${ageDays} days ago`);
+    const parsed = Math.floor((now - new Date(facts.createdAt).getTime()) / 86400000);
+    ageDays = Number.isFinite(parsed) ? parsed : null;   // ignore an unparseable timestamp
+    if (ageDays !== null && ageDays <= NEW_PACKAGE_DAYS) {
+      flags.push(`registered ${ageDays} day${ageDays === 1 ? "" : "s"} ago`);
+    }
   }
   if (typeof facts.downloads === "number" && facts.downloads < LOW_DOWNLOADS) {
     flags.push(`${facts.downloads} downloads last month`);
@@ -367,10 +397,11 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
       detail: flags.join(", ") + ". Young or rarely downloaded packages deserve a quick source review."
     };
   }
+  const age = humanAge(ageDays);
   return {
     level: "ok",
     title: "Found",
-    detail: ageDays !== null ? `registered ${Math.floor(ageDays / 365) ? Math.floor(ageDays / 365) + " years" : ageDays + " days"} ago` : ""
+    detail: age ? `registered ${age} ago` : ""
   };
 }
 
@@ -383,9 +414,11 @@ export function registryUrls(name, ecosystem) {
       page: `https://pypi.org/project/${encodeURIComponent(n)}/`
     };
   }
+  const enc = name.startsWith("@") ? encodeURIComponent(name) : name;
   return {
-    api: `https://registry.npmjs.org/${name.startsWith("@") ? encodeURIComponent(name) : name}`,
-    downloads: `https://api.npmjs.org/downloads/point/last-month/${name.startsWith("@") ? encodeURIComponent(name) : name}`,
+    api: `https://registry.npmjs.org/${enc}`,
+    latest: `https://registry.npmjs.org/${enc}/latest`,
+    downloads: `https://api.npmjs.org/downloads/point/last-month/${enc}`,
     page: `https://www.npmjs.com/package/${name}`
   };
 }
