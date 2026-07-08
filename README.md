@@ -126,10 +126,11 @@ const results = await checkAll([{ name: "left-pad", ecosystem: "npm" }]);
 ## Tests
 
 ```bash
-npm test
+npm test           # run the suite
+npm run coverage   # run with line and branch coverage
 ```
 
-66 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, every verdict path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), the CLI's argument parsing, file discovery, and output, and integration tests that run the installed command as a subprocess and assert every exit code. CI runs it all on Node 18, 20, and 22 on Linux, plus Windows and macOS.
+79 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, boundary-value checks on every verdict threshold, each verdict and registry-error path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked and hermetic), the CLI's argument parsing, file discovery, and output, and integration tests that run the installed command as a subprocess and assert every exit code. The engine modules sit at 100% line coverage. CI runs it all on Node 18, 20, and 22 on Linux, plus Windows and macOS.
 
 ## Limitations worth knowing
 

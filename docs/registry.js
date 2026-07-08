@@ -83,7 +83,10 @@ export async function fetchFacts(dep) {
  */
 async function fetchNpmFacts(dep, urls) {
   const latest = await getJson(urls.latest);
-  let exists = latest.status !== 404 && latest.json && !latest.json.error;
+  // Only a successful response confirms existence. A non-404 error (403, 400,
+  // a proxy error page) is NOT proof the package exists, so fall through to the
+  // authoritative full-document check rather than trusting it.
+  let exists = Boolean(latest.ok && latest.json && !latest.json.error);
   let deprecated = Boolean(exists && latest.json.deprecated);
   // npm replaces removed/hijacked packages with a stub published as
   // "x.y.z-security" and described "security holding package". Detect it here,
