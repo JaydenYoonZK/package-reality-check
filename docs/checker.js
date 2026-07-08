@@ -105,6 +105,29 @@ export function normalizePypi(name) {
   return name.toLowerCase().replace(/[-_.]+/g, "-");
 }
 
+// A single package-name segment: starts and ends alphanumeric, with dots,
+// underscores, and hyphens allowed inside. Rejects slashes, spaces, query and
+// fragment characters, and anything else that has no place in a name.
+const NAME_SEGMENT = /^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$/;
+
+/**
+ * Is this a plausibly real package name, as opposed to a path, URL, or an
+ * injection attempt? A dependency name comes from an untrusted manifest and is
+ * placed into a registry URL, so `../../-/npm/v1/...`, `foo?x=1`, `foo#frag`,
+ * or a name with spaces must never be sent to the registry verbatim. Names
+ * that fail this are treated as invalid rather than looked up.
+ */
+export function isValidPackageName(name, ecosystem) {
+  const s = String(name);
+  if (!s || s.length > 214 || s.includes("..")) return false;
+  if (ecosystem === "npm" && s.startsWith("@")) {
+    const slash = s.indexOf("/");
+    if (slash < 1) return false;
+    return NAME_SEGMENT.test(s.slice(1, slash)) && NAME_SEGMENT.test(s.slice(slash + 1));
+  }
+  return NAME_SEGMENT.test(s);
+}
+
 /** Levenshtein distance with early exit above `max`. */
 export function editDistance(a, b, max = 3) {
   if (Math.abs(a.length - b.length) > max) return max + 1;
@@ -332,6 +355,13 @@ function humanAge(ageDays) {
  * list rather than the package being invented.
  */
 export function verdict(name, ecosystem, facts, now = Date.now()) {
+  if (facts.invalid) {
+    return {
+      level: "phantom",
+      title: "Not a valid package name",
+      detail: "This is not a name any registry could hold. It looks like a path, a URL, or a typo, so nothing was requested for it. Check the manifest."
+    };
+  }
   const lookalike = lookalikeOf(name, ecosystem);
   if (!facts.exists) {
     if (facts.foundIn) {
@@ -349,6 +379,16 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
       detail: lookalike
         ? `No such package. Did you mean "${lookalike}"? If an AI tool suggested this name, it likely invented it.`
         : "No such package. If an AI tool suggested this name, it likely invented it. Do not try to install it blindly: a squatter may register it later."
+    };
+  }
+  // The package exists. A registry "security holding" placeholder means the
+  // real package was removed for malware or a serious issue; the name is a
+  // tombstone, not something to install. This outranks every other signal.
+  if (facts.securityHolding) {
+    return {
+      level: "danger",
+      title: "Replaced by a security placeholder",
+      detail: "The registry has replaced this package with an empty \"security holding\" version, which means the original was taken down for malware or a serious security problem. Do not install it. Find out what happened to this name before using it."
     };
   }
   const flags = [];
@@ -414,11 +454,16 @@ export function registryUrls(name, ecosystem) {
       page: `https://pypi.org/project/${encodeURIComponent(n)}/`
     };
   }
-  const enc = name.startsWith("@") ? encodeURIComponent(name) : name;
+  // Always encode: the name is untrusted, and encoding a normal name is a
+  // no-op (encodeURIComponent leaves letters, digits, - _ . ~ alone) while a
+  // hostile name like "../../x" or "foo?x=1" is neutralized into the path.
+  const enc = encodeURIComponent(name);
   return {
     api: `https://registry.npmjs.org/${enc}`,
     latest: `https://registry.npmjs.org/${enc}/latest`,
     downloads: `https://api.npmjs.org/downloads/point/last-month/${enc}`,
+    // page is a display link (npmjs.com wants the literal @scope/name); it is
+    // only shown for names that already validated, so it carries no injection.
     page: `https://www.npmjs.com/package/${name}`
   };
 }

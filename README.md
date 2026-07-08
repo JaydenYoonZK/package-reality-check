@@ -56,8 +56,8 @@ It reads `package.json` (every dependency field) and `requirements.txt`, checks 
 
 | Verdict | Meaning | Fails CI at |
 |---|---|---|
-| `PHANTOM` | Not in the registry. Likely invented; a squatter may claim it. | `--fail-on phantom` (default) |
-| `DANGER` | A fresh, low-download lookalike of a popular package. | `--fail-on danger` |
+| `PHANTOM` | Not in the registry, or not a valid package name. Likely invented; a squatter may claim it. | `--fail-on phantom` (default) |
+| `DANGER` | A fresh, low-download lookalike of a popular package, or a name the registry replaced with a "security holding" placeholder (its original was pulled for malware). | `--fail-on danger` |
 | `CHECK` | New, deprecated, barely downloaded, or one edit from a popular name. | `--fail-on warn` |
 | `OK` | Real and established. | never |
 
@@ -76,7 +76,8 @@ Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/packa
 - `package.json` (every dependency field), `requirements.txt` (specifiers, extras, environment markers), and, with `--include-code`, raw JS/TS or Python source imports
 - Skips Node built-ins and the Python standard library, including modules removed in recent Python versions such as `telnetlib`
 - Queries npm and PyPI directly; when a name is missing from one registry but exists in the other, it says so rather than crying phantom, so a wrong-ecosystem guess never reads as an invented package
-- Flags packages that do not exist, are registered in the last 120 days, are barely downloaded, are deprecated, or are within typo distance of several hundred popular packages
+- Flags packages that do not exist, are registered in the last 120 days, are barely downloaded, are deprecated, are within typo distance of several hundred popular packages, or have been replaced by a registry "security holding" placeholder after a takedown
+- Validates every name first, so a manifest entry that is really a path, a URL, or an injection attempt is called out instead of being sent to the registry
 - Explains every verdict in plain language
 
 ## Use the engine in your own project
@@ -94,7 +95,7 @@ const results = await checkAll([{ name: "left-pad", ecosystem: "npm" }]);
 npm test
 ```
 
-47 tests cover manifest and import parsing, BOM and truncated-file handling, malformed-manifest rejection, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, typo distance, every verdict path, the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output.
+52 tests cover manifest and import parsing, BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, typo distance, every verdict path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output.
 
 ## Limitations worth knowing
 

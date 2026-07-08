@@ -8,7 +8,7 @@
  * risk itself.
  */
 
-import { registryUrls, verdict, ESTABLISHED_DOWNLOADS } from "./checker.js";
+import { registryUrls, verdict, isValidPackageName, ESTABLISHED_DOWNLOADS } from "./checker.js";
 
 const UA = "package-reality-check (+https://github.com/JaydenYoonZK/package-reality-check)";
 
@@ -52,6 +52,9 @@ async function existsInOther(name, ecosystem) {
 
 /** Fetch registry facts for a dependency: { exists, createdAt?, downloads?, deprecated?, foundIn?, error? }. */
 export async function fetchFacts(dep) {
+  // Reject names that are not real package names (paths, URLs, injection)
+  // before building any URL or touching the network.
+  if (!isValidPackageName(dep.name, dep.ecosystem)) return { exists: false, invalid: true };
   const urls = registryUrls(dep.name, dep.ecosystem);
   try {
     return dep.ecosystem === "npm" ? await fetchNpmFacts(dep, urls) : await fetchPypiFacts(dep, urls);
@@ -77,6 +80,15 @@ async function fetchNpmFacts(dep, urls) {
   const latest = await getJson(urls.latest);
   let exists = latest.status !== 404 && latest.json && !latest.json.error;
   let deprecated = Boolean(exists && latest.json.deprecated);
+  // npm replaces removed/hijacked packages with a stub published as
+  // "x.y.z-security" and described "security holding package". Detect it here,
+  // from the same tiny manifest, so it never reads as a mere low-download warn.
+  let securityHolding = false;
+  if (exists) {
+    const v = String(latest.json.version || "");
+    const desc = String(latest.json.description || "").toLowerCase();
+    securityHolding = /-security$/.test(v) || desc === "security holding package";
+  }
 
   let downloads = null;
   try {
@@ -104,7 +116,7 @@ async function fetchNpmFacts(dep, urls) {
   }
 
   if (!exists) return { exists: false, foundIn: (await existsInOther(dep.name, dep.ecosystem)) ? "other" : null };
-  return { exists: true, createdAt, downloads, deprecated };
+  return { exists: true, createdAt, downloads, deprecated, securityHolding };
 }
 
 /** PyPI facts: existence and the earliest upload across all releases (its age). */

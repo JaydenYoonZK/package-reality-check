@@ -2,8 +2,33 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   extract, parsePackageJson, resolveNpmDep, parseRequirements, parseJsImports, parsePyImports,
-  editDistance, lookalikeOf, normalizePypi, verdict, registryUrls
+  editDistance, lookalikeOf, normalizePypi, verdict, registryUrls, isValidPackageName
 } from "../docs/checker.js";
+
+test("isValidPackageName accepts real names and rejects paths/URLs/injection", () => {
+  for (const ok of ["express", "left-pad", "socket.io", "q", "JSONStream", "@types/node", "@babel/core"]) {
+    assert.equal(isValidPackageName(ok, "npm"), true, `${ok} should be valid`);
+  }
+  for (const bad of ["../../-/npm/v1/x", "foo/bar", "foo?x=1", "foo#frag", "foo bar", "", ".hidden", "a..b", "@/no-scope", "@scope/a/b"]) {
+    assert.equal(isValidPackageName(bad, "npm"), false, `${bad} should be invalid`);
+  }
+  assert.equal(isValidPackageName("requests", "pypi"), true);
+  assert.equal(isValidPackageName("../evil", "pypi"), false);
+});
+
+test("verdict: an invalid name is a phantom, not a lookup", () => {
+  const v = verdict("../../etc/passwd", "npm", { exists: false, invalid: true });
+  assert.equal(v.level, "phantom");
+  assert.match(v.title, /Not a valid package name/);
+});
+
+test("verdict: a security-holding package is danger, outranking download age", () => {
+  const now = Date.parse("2026-07-08");
+  const v = verdict("flatmap-stream", "npm",
+    { exists: true, securityHolding: true, downloads: 333, createdAt: "2018-01-01T00:00:00Z" }, now);
+  assert.equal(v.level, "danger");
+  assert.match(v.title, /security placeholder/i);
+});
 
 test("resolveNpmDep skips non-registry deps and resolves npm aliases", () => {
   assert.equal(resolveNpmDep("express", "^4.18.0"), "express");
