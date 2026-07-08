@@ -3,6 +3,25 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.1] - 2026-07-09
+
+### Added
+
+- Integration tests: the suite now runs the real CLI as a subprocess and asserts every exit code (0 clean, 1 findings, 2 usage error, no manifest, unreadable manifest, and the JSON error shape). Previously only library functions were tested.
+- CI now also runs on Windows and macOS, alongside Node 18, 20, and 22 on Linux.
+- A security policy (SECURITY.md) with private reporting instructions.
+
+### Changed
+
+- The README console example is now the verbatim output of a real run. The old example had drifted: `lodahs` is no longer a mild "one edit away" note, it is a DANGER, because npm seized that name after actual malware shipped under it.
+- The README documents the exit-code table and the `--json` output shape, states the typo pool size precisely (240+ curated names), and notes that the tool checks declared dependencies, not the resolved lockfile tree.
+
+### Fixed
+
+- The cross-registry check no longer queries PyPI for scoped npm names (they cannot exist there) and lowercases names when checking the npm side, so a PyPI-style name like `Flask_SQLAlchemy` gets an honest wrong-ecosystem answer.
+- `npm test` no longer relies on shell glob expansion, so it works on Windows.
+- The browser tool's detection note is announced to screen readers.
+
 ## [1.5.0] - 2026-07-08
 
 ### Added

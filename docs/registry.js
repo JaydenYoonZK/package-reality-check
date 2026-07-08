@@ -43,8 +43,13 @@ async function getJson(url, { timeoutMs = 20000, retries = 3 } = {}) {
 /** Does this name exist in the other ecosystem? Guards against wrong-ecosystem false phantoms. */
 async function existsInOther(name, ecosystem) {
   const other = ecosystem === "npm" ? "pypi" : "npm";
+  // A scoped npm name (@scope/pkg) cannot exist on PyPI; skip the request.
+  if (other === "pypi" && name.startsWith("@")) return false;
+  // npm names are lowercase, so a PyPI-style name must be lowercased to get
+  // an honest answer (Flask_SQLAlchemy would otherwise always miss).
+  const lookup = other === "npm" ? name.toLowerCase() : name;
   try {
-    const r = await getJson(registryUrls(name, other).api);
+    const r = await getJson(registryUrls(lookup, other).api);
     if (r.status === 404 || !r.ok) return false;
     return !(r.json && r.json.error);
   } catch { return false; }

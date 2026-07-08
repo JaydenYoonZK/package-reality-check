@@ -17,13 +17,20 @@ $ npx github:JaydenYoonZK/package-reality-check
 
   ✗ npm  express-jwt-secure-tokens  PHANTOM  Not found in the registry
        No such package. If an AI tool suggested this name, it likely invented it.
-  ! npm  lodahs                     CHECK    One edit away from "lodash"
-  ! npm  react-codeshift            CHECK    24 downloads last month, worth a look
+  ✗ npm  lodahs                     DANGER  Replaced by a security placeholder
+       The registry has replaced this package with an empty "security holding"
+       version, which means the original was taken down for malware.
+  ! npm  react-codeshift            CHECK  Exists, worth a closer look
+       24 downloads last month. Young or rarely downloaded packages deserve
+       a quick source review.
   ✓ npm  react                      OK
 
-  1 phantom  ·  2 to review  ·  1 real
-  ✗ 1 package could not be trusted. Do not install until you have verified each one.
+  1 phantom  ·  1 dangerous  ·  1 to review  ·  1 real
+
+  ✗ 2 packages could not be trusted. Do not install until you have verified each one.
 ```
+
+Every line above is a real result: `lodahs` is not a hypothetical, it is a name that carried actual malware until npm seized it.
 
 ## Why this exists
 
@@ -64,6 +71,32 @@ It reads `package.json` (every dependency field), `requirements.txt`, and `pypro
 
 Full options are in `--help`.
 
+### Exit codes and JSON output
+
+The contract a pipeline can rely on:
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Clean: nothing at or above the `--fail-on` level |
+| `1` | Findings at or above the `--fail-on` level |
+| `2` | Usage error, no manifest found, an unparseable manifest with nothing else to check, or every lookup failed (nothing was verified) |
+
+`--json` prints one object to stdout:
+
+```json
+{
+  "packages": 4,
+  "unreadable": ["sub/package.json"],
+  "results": [
+    { "name": "lodahs", "ecosystem": "npm", "level": "danger",
+      "title": "Replaced by a security placeholder", "detail": "...",
+      "source": "dependencies", "file": "package.json" }
+  ]
+}
+```
+
+`level` is one of `ok`, `warn`, `danger`, `phantom`, or `error` (could not be checked). `unreadable` is present only when a manifest could not be parsed.
+
 <a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
   <img src="docs/assets/preview.png" alt="Package Reality Check flagging invented packages from an AI-generated requirements.txt, with did-you-mean hints" width="100%">
 </a>
@@ -77,7 +110,7 @@ Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/packa
 - `package.json` (every dependency field), `requirements.txt` (specifiers, extras, environment markers), `pyproject.toml` (PEP 621 dependencies and optional groups, Poetry tables, and build-system requires), and, with `--include-code`, raw JS/TS or Python source imports
 - Skips Node built-ins and the Python standard library, including modules removed in recent Python versions such as `telnetlib`
 - Queries npm and PyPI directly; when a name is missing from one registry but exists in the other, it says so rather than crying phantom, so a wrong-ecosystem guess never reads as an invented package
-- Flags packages that do not exist, are registered in the last 120 days, are barely downloaded, are deprecated, are within typo distance of several hundred popular packages, or have been replaced by a registry "security holding" placeholder after a takedown
+- Flags packages that do not exist, are registered in the last 120 days, are barely downloaded, are deprecated, are within typo distance (transpositions included) of a curated pool of 240+ popular packages, or have been replaced by a registry "security holding" placeholder after a takedown
 - Validates every name first, so a manifest entry that is really a path, a URL, or an injection attempt is called out instead of being sent to the registry
 - Explains every verdict in plain language
 
@@ -96,13 +129,15 @@ const results = await checkAll([{ name: "left-pad", ecosystem: "npm" }]);
 npm test
 ```
 
-58 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, every verdict path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output. CI runs the suite on Node 18, 20, and 22.
+66 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, every verdict path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), the CLI's argument parsing, file discovery, and output, and integration tests that run the installed command as a subprocess and assert every exit code. CI runs it all on Node 18, 20, and 22 on Linux, plus Windows and macOS.
 
 ## Limitations worth knowing
 
 - Only npm and PyPI. Other ecosystems are tracked in [issues](https://github.com/JaydenYoonZK/package-reality-check/issues).
+- It checks the dependencies you declare, not the resolved lockfile tree. Transitive dependencies are your package manager's territory; this tool guards the moment a name enters your manifest.
 - Internal/private packages will show as PHANTOM, because the tool can only see public registries. That is also a nudge to protect those names.
 - Edit distance cannot read intent; occasional legitimate near-name packages will ask you for thirty seconds of judgment.
+- Corporate proxies: Node's built-in fetch does not read `HTTP_PROXY`/`HTTPS_PROXY` by default. On Node 24+ set `NODE_USE_ENV_PROXY=1`; on older versions run it from a network that can reach the registries directly.
 
 ## License
 
