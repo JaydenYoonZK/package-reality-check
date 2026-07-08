@@ -111,36 +111,42 @@ function isRequirementsFile(name) {
   return /^(requirements[\w.-]*\.txt|dev-requirements\.txt|constraints\.txt)$/i.test(name);
 }
 
+const readText = (f) => readFileSync(f, "utf8").replace(/^﻿/, ""); // strip UTF-8 BOM
+
 export function collectDeps(root, includeCode) {
   const deps = [];
   const seen = new Set();
+  const unreadable = [];
   let manifests = 0;
+  const rel = (file) => relative(root, file) || basename(file);
   const push = (list, file) => {
     for (const d of list) {
       const key = d.ecosystem + ":" + d.name;
       if (seen.has(key)) continue;
       seen.add(key);
-      deps.push({ ...d, file: relative(root, file) || basename(file) });
+      deps.push({ ...d, file: rel(file) });
     }
   };
 
   const all = walk(root);
   for (const f of all) {
     const name = basename(f);
-    try {
-      if (name === "package.json") {
-        manifests++;
-        push(parsePackageJson(readFileSync(f, "utf8")), f);
-      } else if (isRequirementsFile(name)) {
-        manifests++;
-        push(parseRequirements(readFileSync(f, "utf8")), f);
-      } else if (includeCode && CODE_EXT.has(extname(f))) {
-        const text = readFileSync(f, "utf8");
+    if (name === "package.json") {
+      manifests++;
+      try { push(parsePackageJson(readText(f)), f); }
+      catch { unreadable.push(rel(f)); }   // a manifest we cannot parse must not read as clean
+    } else if (isRequirementsFile(name)) {
+      manifests++;
+      try { push(parseRequirements(readText(f)), f); }
+      catch { unreadable.push(rel(f)); }
+    } else if (includeCode && CODE_EXT.has(extname(f))) {
+      try {
+        const text = readText(f);
         push(extname(f) === ".py" ? parsePyImports(text) : parseJsImports(text), f);
-      }
-    } catch { /* unreadable or malformed file: skip */ }
+      } catch { /* a single source file is best-effort; skip quietly */ }
+    }
   }
-  return { deps, manifests };
+  return { deps, manifests, unreadable };
 }
 
 /* ------------------------------- output ------------------------------- */
@@ -232,8 +238,16 @@ async function main() {
   const colorEnabled = opts.color !== null ? opts.color : (process.stdout.isTTY && !process.env.NO_COLOR);
   const c = makeColor(colorEnabled);
 
-  const { deps, manifests } = collectDeps(root, opts.includeCode);
+  const { deps, manifests, unreadable } = collectDeps(root, opts.includeCode);
   if (!deps.length) {
+    // A manifest we found but could not parse must never read as a clean pass.
+    if (unreadable.length) {
+      if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], unreadable, message: "Could not parse manifest" }));
+      else console.error(c.yellow(`\n  Could not parse ${unreadable.length === 1 ? "this manifest" : "these manifests"}:`) +
+        "\n" + unreadable.map(f => `    ${f}`).join("\n") +
+        c.dim("\n\n  Fix the file (a stray comma or a truncated line will do it) and run again.\n"));
+      process.exit(2);
+    }
     if (manifests > 0) {
       // A real project that simply has no dependencies. That is a clean pass.
       if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], message: "No dependencies to check" }));
@@ -244,6 +258,9 @@ async function main() {
     else console.error("No package.json or requirements.txt found here. Point at a project directory" +
       (opts.includeCode ? "." : ", or pass --include-code to scan source imports."));
     process.exit(2);
+  }
+  if (unreadable.length && !opts.json && !opts.quiet) {
+    process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.join(", ")} — those files were skipped.\n`));
   }
 
   if (!opts.json && process.stderr.isTTY) {
@@ -262,6 +279,7 @@ async function main() {
   if (opts.json) {
     console.log(JSON.stringify({
       packages: results.length,
+      unreadable: unreadable.length ? unreadable : undefined,
       results: results.map(r => ({
         name: r.name, ecosystem: r.ecosystem, level: r.level,
         title: r.title || null, detail: r.detail || null, source: r.source || null, file: r.file || null
