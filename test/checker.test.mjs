@@ -1,9 +1,59 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  extract, parsePackageJson, resolveNpmDep, parseRequirements, parseJsImports, parsePyImports,
-  editDistance, lookalikeOf, normalizePypi, verdict, registryUrls, isValidPackageName
+  extract, parsePackageJson, resolveNpmDep, parseRequirements, parsePyproject, parseJsImports, parsePyImports,
+  editDistance, lookalikeOf, normalizePypi, verdict, registryUrls, isValidPackageName,
+  POPULAR_NPM, POPULAR_PYPI
 } from "../docs/checker.js";
+
+test("parsePyproject reads PEP 621 dependencies, optional groups, and build requires", () => {
+  const deps = parsePyproject([
+    '[build-system]',
+    'requires = ["setuptools>=61", "wheel"]',
+    '',
+    '[project]',
+    'name = "myapp"',
+    'classifiers = [',
+    '  "Programming Language :: Python :: 3",',
+    ']',
+    'dependencies = [',
+    '  "requests>=2.31",',
+    '  "uvicorn[standard]>=0.29",  # server',
+    "  \"pydantic ; python_version >= '3.8'\",",
+    ']',
+    '',
+    '[project.optional-dependencies]',
+    'dev = ["pytest>=8", "ruff"]',
+    '',
+    '[project.urls]',
+    'Homepage = "https://example.com"',
+  ].join("\n"));
+  assert.deepEqual(deps.map(d => d.name),
+    ["setuptools", "wheel", "requests", "uvicorn", "pydantic", "pytest", "ruff"]);
+  assert.ok(deps.every(d => d.ecosystem === "pypi" && d.source === "pyproject"));
+});
+
+test("parsePyproject reads Poetry dependency tables, skipping python itself", () => {
+  const deps = parsePyproject([
+    '[tool.poetry.dependencies]',
+    'python = "^3.11"',
+    'requests = "^2.31"',
+    'uvicorn = { extras = ["standard"], version = "^0.29" }',
+    '"tomli" = "^2"',
+    '',
+    '[tool.poetry.group.dev.dependencies]',
+    'pytest = "^8"',
+  ].join("\n"));
+  assert.deepEqual(deps.map(d => d.name), ["requests", "uvicorn", "tomli", "pytest"]);
+  // inline-table values ("standard", "^0.29") must never leak in as names
+  assert.ok(!deps.some(d => /\^|standard/.test(d.name)));
+});
+
+test("extract() detects a pasted pyproject.toml", () => {
+  const r = extract('[project]\ndependencies = ["requests>=2"]');
+  assert.equal(r.kind, "pyproject.toml");
+  assert.deepEqual(r.deps.map(d => d.name), ["requests"]);
+});
 
 test("isValidPackageName accepts real names and rejects paths/URLs/injection", () => {
   for (const ok of ["express", "left-pad", "socket.io", "q", "JSONStream", "@types/node", "@babel/core"]) {
@@ -20,6 +70,14 @@ test("verdict: an invalid name is a phantom, not a lookup", () => {
   const v = verdict("../../etc/passwd", "npm", { exists: false, invalid: true });
   assert.equal(v.level, "phantom");
   assert.match(v.title, /Not a valid package name/);
+});
+
+test("homoglyph names (non-ASCII lookalikes) are invalid, not lookup-able", () => {
+  // "reаct" with a Cyrillic "а": such a name cannot exist on npm or PyPI,
+  // so it must be rejected as invalid rather than queried.
+  const cyrillicA = String.fromCharCode(0x0430);
+  assert.equal(isValidPackageName("re" + cyrillicA + "ct", "npm"), false);
+  assert.equal(isValidPackageName("re" + cyrillicA + "ct", "pypi"), false);
 });
 
 test("verdict: a security-holding package is danger, outranking download age", () => {
@@ -149,17 +207,31 @@ test("PEP 503 normalization", () => {
   assert.equal(normalizePypi("zope.interface"), "zope-interface");
 });
 
-test("edit distance", () => {
-  assert.equal(editDistance("requests", "reqeusts"), 2);
-  assert.equal(editDistance("lodash", "lodahs"), 2);
+test("edit distance is OSA: an adjacent transposition costs one edit", () => {
+  assert.equal(editDistance("requests", "reqeusts"), 1);   // eu swapped
+  assert.equal(editDistance("lodash", "lodahs"), 1);       // hs swapped
+  assert.equal(editDistance("react", "raect"), 1);         // ae swapped
+  assert.equal(editDistance("vue", "veu"), 1);             // eu swapped
   assert.equal(editDistance("react", "react"), 0);
+  assert.equal(editDistance("react", "reacts"), 1);        // insertion
+  assert.equal(editDistance("react", "reoct"), 1);         // substitution
+  assert.equal(editDistance("ab", "ba"), 1);               // pure swap
   assert.ok(editDistance("short", "completely-different", 2) > 2);
 });
 
-test("lookalike detection catches classic typos", () => {
+test("lookalike detection catches classic typos, including short-name transpositions", () => {
   assert.equal(lookalikeOf("reqeusts", "pypi"), "requests");
   assert.equal(lookalikeOf("lodahs", "npm"), "lodash");
   assert.equal(lookalikeOf("expresss", "npm"), "express");
+  // Transpositions in short names were missed under plain Levenshtein
+  // (a swap counted as 2 edits, above the limit of 1 for names under 6 chars).
+  assert.equal(lookalikeOf("raect", "npm"), "react");
+  assert.equal(lookalikeOf("veu", "npm"), "vue");
+});
+
+test("no popular package flags another popular package as its lookalike", () => {
+  for (const p of POPULAR_NPM) assert.equal(lookalikeOf(p, "npm"), null, `${p} must not be a lookalike`);
+  for (const p of POPULAR_PYPI) assert.equal(lookalikeOf(p, "pypi"), null, `${p} must not be a lookalike`);
 });
 
 test("exact popular names are not their own lookalike", () => {
@@ -210,6 +282,19 @@ test("verdict: an established package resembling a popular name is not a typosqu
   // a fresh, low-download lookalike is still dangerous
   const fresh = verdict("lodahs", "npm", { exists: true, createdAt: "2026-06-20T00:00:00Z", downloads: 12 }, now);
   assert.equal(fresh.level, "danger");
+});
+
+test("verdict: an OLD but near-dead lookalike is still flagged (parked typosquat)", () => {
+  const now = Date.parse("2026-07-08");
+  // "raect" exists on npm: registered years ago, ~85 downloads a month, one
+  // edit from react. Age alone must not suppress the lookalike signal when
+  // the downloads are known to be tiny.
+  const parked = verdict("raect", "npm", { exists: true, createdAt: "2019-01-01T00:00:00Z", downloads: 85 }, now);
+  assert.equal(parked.level, "danger");
+  assert.match(parked.title, /react/);
+  // but an old lookalike with moderate, real use is left alone
+  const modest = verdict("raect", "npm", { exists: true, createdAt: "2019-01-01T00:00:00Z", downloads: 5000 }, now);
+  assert.equal(modest.level, "ok");
 });
 
 test("verdict: ok for established package", () => {

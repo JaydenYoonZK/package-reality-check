@@ -14,7 +14,7 @@
 import { readFileSync, readdirSync, statSync, realpathSync } from "node:fs";
 import { join, resolve, relative, extname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parsePackageJson, parseRequirements, parseJsImports, parsePyImports } from "../docs/checker.js";
+import { parsePackageJson, parseRequirements, parsePyproject, parseJsImports, parsePyImports } from "../docs/checker.js";
 import { checkAll } from "../docs/registry.js";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -40,6 +40,7 @@ export function parseArgs(argv) {
     else rest.push(a);
   }
   if (rest[0]) opts.path = rest[0];
+  if (rest.length > 1) opts.extraArg = rest[1];
   return opts;
 }
 
@@ -64,10 +65,12 @@ OPTIONS
   -v, --version        Show version
 
 WHAT IT CHECKS
-  package.json (all dependency fields) and requirements.txt against the
+  package.json (all dependency fields), requirements.txt, and
+  pyproject.toml (PEP 621, Poetry, and build-system requires) against the
   live npm and PyPI registries. Flags packages that do not exist, that are
-  brand new, deprecated, barely downloaded, or one edit away from a
-  popular name. Node built-ins and the Python standard library are skipped.
+  brand new, deprecated, barely downloaded, one edit away from a popular
+  name, or replaced by a registry security placeholder. Node built-ins and
+  the Python standard library are skipped.
 
 EXIT CODES
   0  clean (nothing at or above --fail-on)
@@ -147,6 +150,10 @@ export function collectDeps(root, includeCode) {
     } else if (isRequirementsFile(name)) {
       manifests++;
       try { push(parseRequirements(readText(f)), f); }
+      catch { unreadable.push(rel(f)); }
+    } else if (name === "pyproject.toml") {
+      manifests++;
+      try { push(parsePyproject(readText(f)), f); }
       catch { unreadable.push(rel(f)); }
     } else if (includeCode && CODE_EXT.has(extname(f))) {
       try {
@@ -237,6 +244,10 @@ async function main() {
   if (opts.help) { console.log(HELP); process.exit(0); }
   if (opts.version) { console.log(VERSION); process.exit(0); }
   if (opts.badFlag) { console.error(`Unknown option: ${opts.badFlag}\nRun with --help.`); process.exit(2); }
+  if (opts.extraArg) { console.error(`Unexpected argument: ${opts.extraArg}. Pass a single project directory.`); process.exit(2); }
+  if (opts.failOn === undefined || opts.failOn === "") {
+    console.error("Missing value for --fail-on. Use phantom, danger, warn, or never."); process.exit(2);
+  }
   if (!["phantom", "danger", "warn", "never"].includes(opts.failOn)) {
     console.error(`Invalid --fail-on value: ${opts.failOn}. Use phantom, danger, warn, or never.`); process.exit(2);
   }
@@ -270,7 +281,7 @@ async function main() {
     process.exit(2);
   }
   if (unreadable.length && !opts.json && !opts.quiet) {
-    process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.map(safeText).join(", ")} — those files were skipped.\n`));
+    process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.map(safeText).join(", ")}, so those files were skipped.\n`));
   }
 
   if (!opts.json && process.stderr.isTTY) {

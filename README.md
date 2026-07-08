@@ -5,6 +5,7 @@ Check that your dependencies actually exist and are plausibly legitimate. Catche
 <p>
   <a href="#cli"><img src="https://img.shields.io/badge/CLI-npx-abcf37?style=for-the-badge&logo=npm&logoColor=black" alt="Run the CLI"></a>
   <a href="https://jaydenyoonzk.github.io/package-reality-check/"><img src="https://img.shields.io/badge/Browser%20tool-open-544741?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open the browser tool"></a>
+  <a href="https://github.com/JaydenYoonZK/package-reality-check/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/JaydenYoonZK/package-reality-check/ci.yml?style=for-the-badge&label=tests" alt="CI status"></a>
   <a href="https://github.com/JaydenYoonZK/package-reality-check/stargazers"><img src="https://img.shields.io/github/stars/JaydenYoonZK/package-reality-check?style=for-the-badge&logo=github" alt="GitHub stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/JaydenYoonZK/package-reality-check?style=for-the-badge" alt="MIT License"></a>
 </p>
@@ -47,7 +48,7 @@ npx github:JaydenYoonZK/package-reality-check ./my-app --include-code
 npx github:JaydenYoonZK/package-reality-check --json
 ```
 
-It reads `package.json` (every dependency field) and `requirements.txt`, checks each dependency against the live npm and PyPI registries, and **exits non-zero when something cannot be trusted**, so it drops straight into CI:
+It reads `package.json` (every dependency field), `requirements.txt`, and `pyproject.toml`, checks each dependency against the live npm and PyPI registries, and **exits non-zero when something cannot be trusted**, so it drops straight into CI:
 
 ```yaml
 # .github/workflows/deps.yml
@@ -69,11 +70,11 @@ Full options are in `--help`.
 
 ## Browser tool
 
-Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/package-reality-check/)** ([demo](https://jaydenyoonzk.github.io/package-reality-check/?demo)) takes a `package.json`, `requirements.txt`, or code with imports and checks it straight from your browser against the registries. Nothing you paste is sent anywhere else.
+Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/package-reality-check/)** ([demo](https://jaydenyoonzk.github.io/package-reality-check/?demo)) takes a `package.json`, `requirements.txt`, `pyproject.toml`, or code with imports and checks it straight from your browser against the registries. Nothing you paste is sent anywhere else.
 
 ## What it checks
 
-- `package.json` (every dependency field), `requirements.txt` (specifiers, extras, environment markers), and, with `--include-code`, raw JS/TS or Python source imports
+- `package.json` (every dependency field), `requirements.txt` (specifiers, extras, environment markers), `pyproject.toml` (PEP 621 dependencies and optional groups, Poetry tables, and build-system requires), and, with `--include-code`, raw JS/TS or Python source imports
 - Skips Node built-ins and the Python standard library, including modules removed in recent Python versions such as `telnetlib`
 - Queries npm and PyPI directly; when a name is missing from one registry but exists in the other, it says so rather than crying phantom, so a wrong-ecosystem guess never reads as an invented package
 - Flags packages that do not exist, are registered in the last 120 days, are barely downloaded, are deprecated, are within typo distance of several hundred popular packages, or have been replaced by a registry "security holding" placeholder after a takedown
@@ -95,7 +96,7 @@ const results = await checkAll([{ name: "left-pad", ecosystem: "npm" }]);
 npm test
 ```
 
-52 tests cover manifest and import parsing, BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, typo distance, every verdict path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output.
+58 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, every verdict path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output. CI runs the suite on Node 18, 20, and 22.
 
 ## Limitations worth knowing
 

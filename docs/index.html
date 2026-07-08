@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Package Reality Check: are AI-suggested packages real?</title>
-  <meta name="description" content="AI code assistants invent package names, and attackers register them. Paste a package.json, requirements.txt, or code, and check every dependency against npm and PyPI.">
+  <meta name="description" content="AI code assistants invent package names, and attackers register them. Paste a package.json, requirements.txt, pyproject.toml, or code, and check every dependency against npm and PyPI.">
   <link rel="canonical" href="https://jaydenyoonzk.github.io/package-reality-check/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0c0a'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='32' fill='%23abcf37'%3E%F0%9F%91%BB%3C/text%3E%3C/svg%3E">
   <meta property="og:title" content="Package Reality Check: are AI-suggested packages real?">
@@ -144,7 +144,7 @@
 <main class="wrap">
   <div class="card">
     <label for="input" style="display:none">Dependencies to check</label>
-    <textarea id="input" placeholder="Paste a package.json, a requirements.txt, or code with imports..." spellcheck="false"></textarea>
+    <textarea id="input" placeholder="Paste a package.json, a requirements.txt, a pyproject.toml, or code with imports..." spellcheck="false"></textarea>
     <div class="toolbar">
       <button id="paste" class="primary" type="button">Paste &amp; check</button>
       <button id="check" type="button">Check packages</button>
@@ -180,7 +180,7 @@
 
     <h2 id="checks">🧰 What this tool checks</h2>
     <ul>
-      <li>Every dependency in a pasted <code>package.json</code> (all dependency fields), <code>requirements.txt</code> (specifiers, extras, and markers are handled), or source code with <code>import</code> and <code>require</code> statements.</li>
+      <li>Every dependency in a pasted <code>package.json</code> (all dependency fields), <code>requirements.txt</code> (specifiers, extras, and markers are handled), <code>pyproject.toml</code> (PEP 621 and Poetry), or source code with <code>import</code> and <code>require</code> statements.</li>
       <li>Node built-ins and the Python standard library are recognized and skipped, including modules removed in recent Python versions such as <code>telnetlib</code>.</li>
       <li>Registration date and monthly downloads (npm) and first upload date (PyPI) for existence checks with context.</li>
       <li>Edit distance against several hundred of the most-installed packages in each ecosystem, to catch <code>reqeusts</code> and <code>lodahs</code> before they catch you.</li>
