@@ -94,7 +94,7 @@ const results = await checkAll([{ name: "left-pad", ecosystem: "npm" }]);
 npm test
 ```
 
-29 tests cover manifest and import parsing, stdlib filtering, PEP 503 normalization, typo distance, every verdict path, the registry layer (with retries and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output.
+36 tests cover manifest and import parsing, BOM and truncated-file handling, stdlib filtering, PEP 503 normalization, typo distance, every verdict path, the registry layer (with retries and network-error handling, all mocked), and the CLI's argument parsing, file discovery, and output.
 
 ## Limitations worth knowing
 

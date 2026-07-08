@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.1] - 2026-07-08
+
+### Fixed
+
+- A `package.json` saved with a UTF-8 byte-order mark (what many Windows editors write) is now parsed correctly instead of being silently skipped. A BOM is no longer mistaken for a broken file.
+- A manifest that cannot be parsed (a truncated or malformed `package.json` or requirements file) is now reported as such and exits with code 2, rather than reading as "no dependencies, nothing to worry about." A security tool must never give a clean bill of health for a file it could not read. When other manifests parse fine, the unreadable ones are noted and the scan continues.
+
 ## [1.4.0] - 2026-07-08
 
 ### Fixed

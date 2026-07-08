@@ -34,6 +34,29 @@ test("collectDeps reads package.json and requirements, dedupes, tags files", () 
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test("collectDeps strips a UTF-8 BOM so Windows-edited manifests still parse", () => {
+  const dir = mkdtempSync(join(tmpdir(), "prc-"));
+  try {
+    // Prepend the BOM and use CRLF, exactly what a Windows editor writes.
+    const body = JSON.stringify({ dependencies: { express: "^4" } }).replace(/\n/g, "\r\n");
+    writeFileSync(join(dir, "package.json"), "﻿" + body);
+    const { deps, unreadable } = collectDeps(dir, false);
+    assert.deepEqual(deps.map(d => d.name), ["express"]);
+    assert.equal(unreadable.length, 0, "a BOM is not a parse failure");
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("collectDeps reports an unparseable manifest instead of silently passing", () => {
+  const dir = mkdtempSync(join(tmpdir(), "prc-"));
+  try {
+    writeFileSync(join(dir, "package.json"), '{ "dependencies": { "express": "^4"  '); // truncated
+    const { deps, manifests, unreadable } = collectDeps(dir, false);
+    assert.equal(deps.length, 0);
+    assert.equal(manifests, 1, "the file was found");
+    assert.deepEqual(unreadable, ["package.json"], "and flagged as unparseable, not treated as empty");
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test("collectDeps skips node_modules and only scans code with --include-code", () => {
   const dir = mkdtempSync(join(tmpdir(), "prc-"));
   try {
