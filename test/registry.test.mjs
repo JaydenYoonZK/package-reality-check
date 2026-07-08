@@ -71,6 +71,56 @@ test("fetchFacts: retries transient 500 then succeeds", async () => {
   assert.ok(calls >= 2, "should have retried");
 });
 
+test("fetchFacts npm: an established package is decided WITHOUT the full document", async () => {
+  // The full registry document can be many megabytes. For a well-downloaded
+  // package we must answer from /latest + downloads alone and never fetch it.
+  let fullFetched = false;
+  globalThis.fetch = async (url) => {
+    if (url.endsWith("/latest")) return { status: 200, ok: true, json: async () => ({ version: "5.0.0" }) };
+    if (url.includes("api.npmjs.org/downloads")) return { status: 200, ok: true, json: async () => ({ downloads: 5_000_000 }) };
+    fullFetched = true;
+    return { status: 200, ok: true, json: async () => ({ time: { created: "2011-01-01T00:00:00Z" } }) };
+  };
+  const f = await fetchFacts({ name: "express", ecosystem: "npm" });
+  assert.equal(f.exists, true);
+  assert.equal(f.downloads, 5_000_000);
+  assert.equal(fullFetched, false, "must not download the multi-MB full document for an established package");
+});
+
+test("fetchFacts npm: a low-download package still gets its creation date", async () => {
+  globalThis.fetch = async (url) => {
+    if (url.endsWith("/latest")) return { status: 200, ok: true, json: async () => ({ version: "0.0.1" }) };
+    if (url.includes("api.npmjs.org/downloads")) return { status: 200, ok: true, json: async () => ({ downloads: 3 }) };
+    return { status: 200, ok: true, json: async () => ({ time: { created: "2026-06-01T00:00:00Z" }, "dist-tags": { latest: "0.0.1" }, versions: { "0.0.1": {} } }) };
+  };
+  const f = await fetchFacts({ name: "tiny-fresh-pkg", ecosystem: "npm" });
+  assert.equal(f.exists, true);
+  assert.equal(f.downloads, 3);
+  assert.equal(f.createdAt, "2026-06-01T00:00:00Z");
+});
+
+test("fetchFacts npm: a prerelease-only package (no latest tag) is not a phantom", async () => {
+  globalThis.fetch = async (url) => {
+    if (url.endsWith("/latest")) return { status: 404, ok: false, json: async () => ({ error: "version not found" }) };
+    if (url.includes("api.npmjs.org/downloads")) return { status: 404, ok: false, json: async () => ({}) };
+    return { status: 200, ok: true, json: async () => ({ "dist-tags": { next: "1.0.0-beta.1" }, time: { created: "2026-05-01T00:00:00Z" }, versions: { "1.0.0-beta.1": {} } }) };
+  };
+  const f = await fetchFacts({ name: "beta-only-pkg", ecosystem: "npm" });
+  assert.equal(f.exists, true, "exists even without a `latest` dist-tag");
+  assert.equal(f.createdAt, "2026-05-01T00:00:00Z");
+});
+
+test("fetchFacts npm: deprecation is read from the latest manifest", async () => {
+  globalThis.fetch = async (url) => {
+    if (url.endsWith("/latest")) return { status: 200, ok: true, json: async () => ({ version: "1.0.0", deprecated: "no longer maintained" }) };
+    if (url.includes("api.npmjs.org/downloads")) return { status: 200, ok: true, json: async () => ({ downloads: 10_000_000 }) };
+    throw new Error("full document should not be needed");
+  };
+  const f = await fetchFacts({ name: "old-pkg", ecosystem: "npm" });
+  assert.equal(f.exists, true);
+  assert.equal(f.deprecated, true);
+});
+
 test("checkAll: returns verdicts in input order with a phantom flagged", async () => {
   stubFetch([
     ["registry.npmjs.org/react", () => ({ body: { "dist-tags": { latest: "18.2.0" }, time: { created: "2013-05-24T00:00:00Z" }, versions: { "18.2.0": {} } } })],

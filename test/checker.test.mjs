@@ -27,6 +27,18 @@ test("parsePackageJson skips workspace and local deps (no monorepo false phantom
   assert.deepEqual(names, ["express", "left-pad"]);
 });
 
+test("parsePackageJson ignores a malformed dependency block (no junk names)", () => {
+  // A dependencies field that is a string or array is malformed. Object.entries
+  // would otherwise turn it into deps named "0", "1", ... Each must yield none.
+  assert.deepEqual(parsePackageJson(JSON.stringify({ dependencies: "express" })), []);
+  assert.deepEqual(parsePackageJson(JSON.stringify({ dependencies: ["express", "lodash"] })), []);
+  assert.deepEqual(parsePackageJson(JSON.stringify({ dependencies: 42 })), []);
+  assert.deepEqual(parsePackageJson(JSON.stringify({ dependencies: null })), []);
+  // A valid block alongside a malformed one still yields the valid names.
+  const mixed = parsePackageJson(JSON.stringify({ dependencies: { express: "^4" }, devDependencies: ["bad"] }));
+  assert.deepEqual(mixed.map(d => d.name), ["express"]);
+});
+
 test("parses package.json across dependency fields", () => {
   const deps = parsePackageJson(JSON.stringify({
     dependencies: { express: "^4.18.0", "@scope/pkg": "1.0.0" },
@@ -65,6 +77,26 @@ test("extracts JS imports, skipping relative, node builtins, and deep paths", ()
   `);
   assert.deepEqual(deps.map(d => d.name).sort(),
     ["@aws-sdk/client-s3", "chalk", "express", "lodash"]);
+});
+
+test("parseJsImports is not vulnerable to catastrophic backtracking (ReDoS)", () => {
+  // `import` + a long run of whitespace + `from` with no closing quote once
+  // caused exponential backtracking. This must complete near-instantly.
+  const t0 = Date.now();
+  parseJsImports("import " + " ".repeat(100000) + "from");
+  parseJsImports("import {" + "a, ".repeat(100000) + "from ");
+  const ms = Date.now() - t0;
+  assert.ok(ms < 1000, `pathological import input should be fast, took ${ms}ms`);
+});
+
+test("parseJsImports ignores property-access calls named import/require", () => {
+  const deps = parseJsImports('obj.require("nope"); foo.import("also-nope"); const c = require("real");');
+  assert.deepEqual(deps.map(d => d.name), ["real"]);
+});
+
+test("parseJsImports handles multi-line and side-effect imports", () => {
+  const deps = parseJsImports('import {\n a,\n b\n} from "multi";\nimport "side-effect";\nexport * from "rxjs";');
+  assert.deepEqual(deps.map(d => d.name).sort(), ["multi", "rxjs", "side-effect"]);
 });
 
 test("extracts Python imports, skipping stdlib and relative", () => {
@@ -162,9 +194,25 @@ test("verdict: ok for established package", () => {
   assert.equal(v.level, "ok");
 });
 
+test("verdict: ok-detail age reads naturally (singular year, no NaN)", () => {
+  const now = Date.parse("2026-07-08");
+  // ~1.5 years old -> "1 year", not "1 years"
+  const oneYear = verdict("p", "npm", { exists: true, createdAt: "2025-01-01T00:00:00Z", downloads: 9e9 }, now);
+  assert.equal(oneYear.detail, "registered 1 year ago");
+  // ~2.5 years old -> "2 years"
+  const twoYears = verdict("p", "npm", { exists: true, createdAt: "2024-01-01T00:00:00Z", downloads: 9e9 }, now);
+  assert.equal(twoYears.detail, "registered 2 years ago");
+  // an unparseable timestamp must not leak "NaN days"
+  const bad = verdict("p", "npm", { exists: true, createdAt: "not-a-date", downloads: 9e9 }, now);
+  assert.equal(bad.level, "ok");
+  assert.ok(!/NaN/.test(bad.detail), `detail should not contain NaN, got: ${bad.detail}`);
+});
+
 test("registry URLs encode scoped and normalized names", () => {
   assert.equal(registryUrls("@scope/pkg", "npm").api,
     "https://registry.npmjs.org/%40scope%2Fpkg");
+  assert.equal(registryUrls("@scope/pkg", "npm").latest,
+    "https://registry.npmjs.org/%40scope%2Fpkg/latest");
   assert.equal(registryUrls("Flask_SQLAlchemy", "pypi").api,
     "https://pypi.org/pypi/flask-sqlalchemy/json");
 });

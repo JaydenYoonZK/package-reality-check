@@ -85,6 +85,14 @@ export function makeColor(enabled) {
   };
 }
 
+// Package names and file paths come from untrusted manifests. A crafted name
+// containing terminal escape sequences could clear the screen, set the title,
+// or inject fake output when printed. Replace every control character before
+// it reaches the terminal. (--json output is already safe: JSON escapes them.)
+export function safeText(s) {
+  return String(s).replace(/[\u0000-\u001f\u007f-\u009f]/g, "\uFFFD");
+}
+
 /* --------------------------- file discovery --------------------------- */
 
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".next", "coverage", "venv", ".venv", "__pycache__", "vendor", ".cache"]);
@@ -95,10 +103,11 @@ function walk(dir, files = [], depth = 0) {
   let entries;
   try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return files; }
   for (const e of entries) {
-    if (e.name.startsWith(".") && e.name !== "." ) { /* allow dotfiles? skip hidden dirs */ }
     const full = join(dir, e.name);
     if (e.isDirectory()) {
-      if (SKIP_DIRS.has(e.name)) continue;
+      // Skip vendored/build directories and any hidden directory (.git,
+      // .github, .venv, caches). Project manifests live in visible folders.
+      if (SKIP_DIRS.has(e.name) || e.name.startsWith(".")) continue;
       walk(full, files, depth + 1);
     } else {
       files.push(full);
@@ -167,7 +176,7 @@ export function render(results, opts, c) {
   for (const r of results) counts[r.level]++;
 
   const order = [...results].sort((a, b) => (RANK[b.level] - RANK[a.level]) || a.name.localeCompare(b.name));
-  const width = Math.min(40, Math.max(...results.map(r => r.name.length), 8));
+  const width = Math.min(40, Math.max(...results.map(r => safeText(r.name).length), 8));
 
   const lines = [];
   lines.push("");
@@ -181,7 +190,8 @@ export function render(results, opts, c) {
       : r.level === "error" ? "?" : "✓";
     const tone = colorFor(c, r.level);
     const eco = c.dim(r.ecosystem.padEnd(4));
-    const name = r.name.length > width ? r.name.slice(0, width - 1) + "…" : r.name.padEnd(width);
+    const clean = safeText(r.name);
+    const name = clean.length > width ? clean.slice(0, width - 1) + "…" : clean.padEnd(width);
     let line = `  ${tone(mark)} ${eco} ${name}  ${tone(LABEL[r.level])}`;
     if (r.title && r.level !== "ok") line += c.dim("  " + r.title);
     lines.push(line);
@@ -244,7 +254,7 @@ async function main() {
     if (unreadable.length) {
       if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], unreadable, message: "Could not parse manifest" }));
       else console.error(c.yellow(`\n  Could not parse ${unreadable.length === 1 ? "this manifest" : "these manifests"}:`) +
-        "\n" + unreadable.map(f => `    ${f}`).join("\n") +
+        "\n" + unreadable.map(f => `    ${safeText(f)}`).join("\n") +
         c.dim("\n\n  Fix the file (a stray comma or a truncated line will do it) and run again.\n"));
       process.exit(2);
     }
@@ -260,7 +270,7 @@ async function main() {
     process.exit(2);
   }
   if (unreadable.length && !opts.json && !opts.quiet) {
-    process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.join(", ")} — those files were skipped.\n`));
+    process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.map(safeText).join(", ")} — those files were skipped.\n`));
   }
 
   if (!opts.json && process.stderr.isTTY) {
