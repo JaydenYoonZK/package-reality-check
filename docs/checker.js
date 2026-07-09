@@ -335,21 +335,149 @@ export function parsePyproject(text) {
   return dedupe(out);
 }
 
-const JS_IMPORT = /(?<![\w.$])(?:(?:import|export)\b[^"']{0,4000}?\bfrom\s*|import\b\s*\(\s*|require\b\s*\(\s*|import\b\s*)["']([^"']+)["']/g;
 const PY_IMPORT = /^[ \t]*(?:import[ \t]+([\w.]+(?:[ \t]*,[ \t]*[\w.]+)*)|from[ \t]+([\w.]+)[ \t]+import)/gm;
+const MAX_IMPORT_SCAN = 4000;
+const isIdent = (ch) => /[A-Za-z0-9_$]/.test(ch ?? "");
+
+function prevNonSpace(code, i) {
+  for (let j = i - 1; j >= 0; j--) {
+    if (!/\s/.test(code[j])) return code[j];
+  }
+  return "";
+}
+
+function isWordAt(code, i, word) {
+  return code.startsWith(word, i) && !isIdent(code[i - 1]) && !isIdent(code[i + word.length]);
+}
+
+function skipString(code, i, quote) {
+  for (let j = i + 1; j < code.length; j++) {
+    if (code[j] === "\\") { j++; continue; }
+    if (code[j] === quote) return j + 1;
+  }
+  return code.length;
+}
+
+function skipLineComment(code, i) {
+  const end = code.indexOf("\n", i + 2);
+  return end === -1 ? code.length : end + 1;
+}
+
+function skipBlockComment(code, i) {
+  const end = code.indexOf("*/", i + 2);
+  return end === -1 ? code.length : end + 2;
+}
+
+function looksLikeRegexStart(code, i) {
+  const prev = prevNonSpace(code, i);
+  return !prev || /[=(:,[!&|?{};]/.test(prev);
+}
+
+function skipRegex(code, i) {
+  let inClass = false;
+  for (let j = i + 1; j < code.length; j++) {
+    const ch = code[j];
+    if (ch === "\\") { j++; continue; }
+    if (ch === "[") inClass = true;
+    else if (ch === "]") inClass = false;
+    else if (ch === "/" && !inClass) {
+      while (/[a-z]/i.test(code[j + 1] ?? "")) j++;
+      return j + 1;
+    } else if (ch === "\n") {
+      return j;
+    }
+  }
+  return code.length;
+}
+
+function skipIgnorable(code, i) {
+  const ch = code[i];
+  const next = code[i + 1];
+  if (ch === '"' || ch === "'" || ch === "`") return skipString(code, i, ch);
+  if (ch === "/" && next === "/") return skipLineComment(code, i);
+  if (ch === "/" && next === "*") return skipBlockComment(code, i);
+  if (ch === "/" && looksLikeRegexStart(code, i)) return skipRegex(code, i);
+  return i;
+}
+
+function skipWs(code, i) {
+  while (/\s/.test(code[i] ?? "")) i++;
+  return i;
+}
+
+function readQuoted(code, i) {
+  i = skipWs(code, i);
+  const quote = code[i];
+  if (quote !== '"' && quote !== "'") return null;
+  let value = "";
+  for (let j = i + 1; j < code.length; j++) {
+    const ch = code[j];
+    if (ch === "\\") {
+      value += code[j + 1] ?? "";
+      j++;
+      continue;
+    }
+    if (ch === quote) return { value, end: j + 1 };
+    value += ch;
+  }
+  return null;
+}
+
+function readFromSpecifier(code, i) {
+  const end = Math.min(code.length, i + MAX_IMPORT_SCAN);
+  for (let j = i; j < end; j++) {
+    const skipped = skipIgnorable(code, j);
+    if (skipped !== j) { j = skipped - 1; continue; }
+    if (isWordAt(code, j, "from")) return readQuoted(code, j + 4);
+  }
+  return null;
+}
 
 export function parseJsImports(code) {
   const out = [];
-  for (const m of code.matchAll(JS_IMPORT)) {
-    let spec = m[1];
-    if (spec.startsWith(".") || spec.startsWith("/") || spec.startsWith("#")) continue;
-    if (spec.startsWith("node:")) continue;
-    if (/^(https?|npm|jsr|data):/.test(spec)) continue;
+  const addSpec = (spec) => {
+    if (spec.startsWith(".") || spec.startsWith("/") || spec.startsWith("#")) return;
+    if (spec.startsWith("node:")) return;
+    if (/^(https?|npm|jsr|data):/.test(spec)) return;
     // Reduce deep imports to the package name; scoped keep two segments.
     const parts = spec.split("/");
     const name = spec.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0];
-    if (!name || NODE_BUILTINS.has(name)) continue;
+    if (!name || NODE_BUILTINS.has(name) || !isValidPackageName(name, "npm")) return;
     out.push({ name, ecosystem: "npm", spec: "", source: "import" });
+  };
+
+  for (let i = 0; i < code.length; i++) {
+    const skipped = skipIgnorable(code, i);
+    if (skipped !== i) { i = skipped - 1; continue; }
+
+    if (isWordAt(code, i, "require") && prevNonSpace(code, i) !== ".") {
+      let j = skipWs(code, i + "require".length);
+      if (code[j] === "(") {
+        const q = readQuoted(code, j + 1);
+        if (q) addSpec(q.value);
+      }
+      continue;
+    }
+
+    if (isWordAt(code, i, "import") && prevNonSpace(code, i) !== ".") {
+      let j = skipWs(code, i + "import".length);
+      if (code[j] === "(") {
+        const q = readQuoted(code, j + 1);
+        if (q) addSpec(q.value);
+      } else if (code[j] === '"' || code[j] === "'") {
+        const q = readQuoted(code, j);
+        if (q) addSpec(q.value);
+      } else {
+        const q = readFromSpecifier(code, j);
+        if (q) addSpec(q.value);
+      }
+      continue;
+    }
+
+    if (isWordAt(code, i, "export")) {
+      const q = readFromSpecifier(code, i + "export".length);
+      if (q) addSpec(q.value);
+    }
   }
   return dedupe(out);
 }
