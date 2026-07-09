@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.8] - 2026-07-09
+
+### Fixed
+
+- The browser tool's stylesheet and script are now referenced with a version query, so a browser that cached an older copy fetches the current one after a deploy instead of serving stale files. The CLI is unaffected.
+
 ## [1.5.7] - 2026-07-09
 
 ### Fixed
