@@ -22,7 +22,7 @@ jobs:
           # CRLF, and the bin shim are the cross-platform risks.
           - os: windows-latest
             node: 20
-          - os: macos-latest
+          - os: macos-15
             node: 20
     steps:
       - uses: actions/checkout@v5
