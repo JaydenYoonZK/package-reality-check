@@ -3,6 +3,20 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.0] - 2026-07-09
+
+### Added
+
+- A Content Security Policy on the browser tool. Unlike the rest of the suite, this tool must reach the network, so instead of blocking it, the policy pins outbound connections to exactly npm and PyPI. Even if markup were ever injected, the browser would refuse to send your dependency list to any other host. Verified in a browser: the registry lookups still work and a request to any other origin is blocked.
+
+### Changed
+
+- Accessibility: the paste box now has a real label instead of one hidden with `display:none`, which removed it from the accessibility tree.
+
+### Notes
+
+This release followed a full audit of the engine, including live checks against npm and PyPI. No correctness or security defects were found: scoped packages resolve correctly, the cheap-existence path holds for scoped names (no accidental multi-megabyte fetch), wrong-ecosystem guesses do not read as phantoms, established lookalikes are not flagged, and the parsers handle extras, environment markers, aliases, and Poetry, PEP 621, and build-system layouts. The prior hardening rounds (ReDoS, terminal-escape injection, the request cap, security-holding detection, and the 403-is-not-existence fix) remain in place.
+
 ## [1.5.17] - 2026-07-09
 
 ### Changed
@@ -273,6 +287,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.6.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.0
 [1.5.17]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.17
 [1.5.16]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.16
 [1.5.15]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.15

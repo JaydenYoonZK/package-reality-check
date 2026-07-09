@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- This tool must reach the registries, so connect-src is not 'none'; it is
+       pinned to exactly npm and PyPI. Even if markup were ever injected, the
+       browser would refuse to send your dependency list anywhere else. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://registry.npmjs.org https://api.npmjs.org https://pypi.org; base-uri 'none'; form-action 'none'">
   <title>Package Reality Check: are AI-suggested packages real?</title>
   <meta name="description" content="AI code assistants invent package names, and attackers register them. Paste a package.json, requirements.txt, pyproject.toml, or code, and check every dependency against npm and PyPI.">
   <link rel="canonical" href="https://jaydenyoonzk.github.io/package-reality-check/">
@@ -23,7 +27,7 @@
       document.documentElement.dataset.theme = t;
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=20260709l">
+  <link rel="stylesheet" href="styles.css?v=20260709m">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -147,7 +151,7 @@
 
 <main class="wrap">
   <div class="card">
-    <label for="input" style="display:none">Dependencies to check</label>
+    <label for="input" class="sr-only">Dependencies to check</label>
     <textarea id="input" placeholder="Paste a package.json, a requirements.txt, a pyproject.toml, or code with imports..." spellcheck="false"></textarea>
     <div class="toolbar">
       <button id="paste" class="primary" type="button" data-tip="Paste from your clipboard and check it right away">Paste &amp; check</button>
@@ -221,6 +225,6 @@
 </footer>
 
 <button id="to-top" class="to-top" type="button" aria-label="Back to top">&#8593;</button>
-<script type="module" src="app.js?v=20260709l"></script>
+<script type="module" src="app.js?v=20260709m"></script>
 </body>
 </html>

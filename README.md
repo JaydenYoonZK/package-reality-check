@@ -103,7 +103,7 @@ The contract a pipeline can rely on:
 
 ## Browser tool
 
-Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/package-reality-check/)** ([demo](https://jaydenyoonzk.github.io/package-reality-check/?demo)) takes a `package.json`, `requirements.txt`, `pyproject.toml`, or code with imports and checks it straight from your browser against the registries. Nothing you paste is sent anywhere else.
+Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/package-reality-check/)** ([demo](https://jaydenyoonzk.github.io/package-reality-check/?demo)) takes a `package.json`, `requirements.txt`, `pyproject.toml`, or code with imports and checks it straight from your browser against the registries. Nothing you paste is sent anywhere else, and a Content Security Policy on the page pins outbound connections to exactly npm and PyPI, so the browser itself refuses to send your dependency list to any other host.
 
 ## What it checks
 
