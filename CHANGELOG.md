@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.15] - 2026-07-09
+
+### Fixed
+
+- Clicking a menu item now always highlights the item you clicked. The highlight was driven by an observer watching a band in the middle of the viewport, but a menu jump lands the section heading at the top, outside that band, so the green pill often stayed on a section the page had merely scrolled past. The active item is now computed directly from the scroll position: the last section whose heading sits above the reading line under the header, with the last section winning at the very bottom of the page.
+
 ## [1.5.14] - 2026-07-09
 
 ### Changed
@@ -255,6 +261,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.5.15]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.15
 [1.5.14]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.14
 [1.5.13]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.13
 [1.5.12]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.12
