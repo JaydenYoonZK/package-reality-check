@@ -1,6 +1,6 @@
 {
   "name": "package-reality-check",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Check that your dependencies actually exist and are plausibly legitimate. Catches AI-hallucinated (slopsquatted) packages and fresh typosquats before you install them. Browser tool and zero-dependency CLI.",
   "type": "module",
   "bin": {
@@ -38,6 +38,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/JaydenYoonZK/package-reality-check.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JaydenYoonZK/package-reality-check/issues"
   },
   "homepage": "https://jaydenyoonzk.github.io/package-reality-check/"
 }
