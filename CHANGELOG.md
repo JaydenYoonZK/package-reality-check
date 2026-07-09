@@ -3,6 +3,21 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.6] - 2026-07-09
+
+### Fixed
+
+- The Check and Clear buttons could stay disabled after loading a sample or pasting, because those set the box programmatically without firing an input event. The button state is now re-synced at the start of every check, so it is always correct however the box was filled.
+
+### Added
+
+- Animated tooltips on the toolbar buttons, on hover and on keyboard focus, explaining what each button does. Disabled buttons explain why (for example, "Paste or type some dependencies first").
+
+### Changed
+
+- On touch devices, the Paste button now focuses the box for a native one-tap paste instead of triggering the clipboard-permission popup that needed a second tap. Desktop keeps its one-click paste.
+- Disabled buttons use the correct muted color token.
+
 ## [1.5.5] - 2026-07-09
 
 ### Changed
