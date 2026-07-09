@@ -10,9 +10,23 @@ const kindNote = $("kind-note");
 const progressBar = $("progress-bar");
 const progressWrap = $("progress");
 const checkBtn = $("check");
+const clearBtn = $("clear");
 
 const MAX_PACKAGES = 200;
 const CONCURRENCY = 6;
+
+// Enable Check and Clear only when there is something to act on. With an empty
+// box there is nothing to check and nothing to clear, so both are disabled
+// (the stylesheet dims them and shows a not-allowed cursor). Check is also
+// disabled while a check is running, but Clear stays usable so you can reset
+// mid-run. Kept in sync on every input, sample, paste, run, and clear.
+let running = false;
+function syncControls() {
+  const hasContent = input.value.trim().length > 0;
+  checkBtn.disabled = running || !hasContent;
+  clearBtn.disabled = !hasContent;
+}
+input.addEventListener("input", syncControls);
 
 // Escape for HTML text and double-quoted attributes (covers & < > " ').
 const esc = (s) => String(s)
@@ -68,7 +82,8 @@ async function run() {
     (deps.length > MAX_PACKAGES ? ` The first ${MAX_PACKAGES} are checked; split larger lists to stay polite to the registries.` : "");
   progressWrap.hidden = false;
   progressBar.style.width = "0%";
-  checkBtn.disabled = true;
+  running = true;
+  syncControls();
 
   const rows = list.map(dep => {
     const tr = document.createElement("tr");
@@ -111,7 +126,8 @@ async function run() {
   if (warns) chips.push(`<span class="chip amber"><strong>${warns}</strong> worth a closer look</span>`);
   if (!chips.length) chips.push(`<span class="chip ok"><strong>All ${list.length}</strong> packages check out</span>`);
   summary.innerHTML = chips.join("");
-  checkBtn.disabled = false;
+  running = false;
+  syncControls();
 }
 
 checkBtn.addEventListener("click", run);
@@ -158,15 +174,19 @@ pasteBtn.addEventListener("click", async () => {
   setTimeout(() => { pasteBtn.textContent = prev; }, 2400);
 });
 
-$("clear").addEventListener("click", () => {
+clearBtn.addEventListener("click", () => {
   input.value = "";
   results.hidden = true;
+  syncControls();
   input.focus();
 });
 
 if (new URLSearchParams(location.search).has("demo")) {
   $("sample-req").click();
 }
+
+// Set the initial enabled/disabled state to match the (empty) box on load.
+syncControls();
 
 const toTop = document.getElementById("to-top");
 if (toTop) {
