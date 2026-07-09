@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.14] - 2026-07-09
+
+### Changed
+
+- The menu now sits in its own tinted band under the brand bar on every screen size, giving the header a clear hierarchy: brand and theme toggle on top, menu below, every item always visible. The whole header is sticky again on all devices, and section jumps measure the header instead of assuming its height, so they land exactly below it however many rows the menu wraps to.
+
 ## [1.5.13] - 2026-07-09
 
 ### Fixed
@@ -249,6 +255,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.5.14]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.14
 [1.5.13]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.13
 [1.5.12]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.12
 [1.4.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.0
