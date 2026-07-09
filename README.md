@@ -6,7 +6,7 @@ Check that your dependencies actually exist and are plausibly legitimate. Catche
   <a href="#cli"><img src="https://img.shields.io/badge/CLI-npx-abcf37?style=for-the-badge&logo=npm&logoColor=black" alt="Run the CLI"></a>
   <a href="https://jaydenyoonzk.github.io/package-reality-check/"><img src="https://img.shields.io/badge/Browser%20tool-open-544741?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open the browser tool"></a>
   <a href="https://github.com/JaydenYoonZK/package-reality-check/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/JaydenYoonZK/package-reality-check/ci.yml?style=for-the-badge&label=tests" alt="CI status"></a>
-  <a href="https://github.com/JaydenYoonZK/package-reality-check/stargazers"><img src="https://img.shields.io/github/stars/JaydenYoonZK/package-reality-check?style=for-the-badge&logo=github" alt="GitHub stars"></a>
+  <a href="https://github.com/JaydenYoonZK/package-reality-check"><img src="https://img.shields.io/github/stars/JaydenYoonZK/package-reality-check?style=for-the-badge&logo=github" alt="GitHub stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/JaydenYoonZK/package-reality-check?style=for-the-badge" alt="MIT License"></a>
 </p>
 
@@ -130,7 +130,7 @@ npm test           # run the suite
 npm run coverage   # run with line and branch coverage
 ```
 
-79 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, boundary-value checks on every verdict threshold, each verdict and registry-error path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked and hermetic), the CLI's argument parsing, file discovery, and output, and integration tests that run the installed command as a subprocess and assert every exit code. The engine modules sit at 100% line coverage. CI runs it all on Node 18, 20, and 22 on Linux, plus Windows and macOS.
+81 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, boundary-value checks on every verdict threshold, each verdict and registry-error path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked and hermetic), the CLI's argument parsing, file discovery, and output, and integration tests that run the installed command as a subprocess and assert every exit code. The engine modules sit at 100% line coverage. CI runs it all on Node 18, 20, and 22 on Linux, plus Windows and macOS.
 
 ## Limitations worth knowing
 

@@ -187,6 +187,24 @@ test("parseJsImports ignores property-access calls named import/require", () => 
   assert.deepEqual(deps.map(d => d.name), ["real"]);
 });
 
+test("parseJsImports ignores examples inside strings, comments, and regex literals", () => {
+  const deps = parseJsImports(`
+    const example = 'import fake from "fake-pkg"; require("also-fake")';
+    // import nope from "comment-fake";
+    /* export * from "block-fake"; */
+    const re = /import x from "regex-fake"/g;
+    import real from "real";
+  `);
+  assert.deepEqual(deps.map(d => d.name), ["real"]);
+});
+
+test("parseJsImports handles malformed syntax without leaking false imports", () => {
+  assert.deepEqual(parseJsImports(`const s = "import fake from 'fake-pkg';`).map(d => d.name), []);
+  assert.deepEqual(parseJsImports('const re = /import fake from "fake-pkg"\nimport real from "real";').map(d => d.name), ["real"]);
+  assert.deepEqual(parseJsImports('const re = /import fake from "fake-pkg"').map(d => d.name), []);
+  assert.deepEqual(parseJsImports('const dep = require("left\\-pad"); require("unterminated').map(d => d.name), ["left-pad"]);
+});
+
 test("parseJsImports handles multi-line and side-effect imports", () => {
   const deps = parseJsImports('import {\n a,\n b\n} from "multi";\nimport "side-effect";\nexport * from "rxjs";');
   assert.deepEqual(deps.map(d => d.name).sort(), ["multi", "rxjs", "side-effect"]);

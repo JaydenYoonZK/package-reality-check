@@ -4,8 +4,7 @@
 
 If you find a security issue in Package Reality Check, please report it privately rather than opening a public issue.
 
-- Use GitHub's private vulnerability reporting on this repository ("Report a vulnerability" under the Security tab), or
-- Email `claude@jaydenart.com` with the details.
+Use GitHub's private vulnerability reporting on this repository: choose "Report a vulnerability" under the Security tab.
 
 You can expect an acknowledgment within 72 hours. Please include steps to reproduce and, if you have one, a suggested fix.
 

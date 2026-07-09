@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Fixed
+
+- Source import scanning no longer treats examples inside JavaScript strings, comments, or regex literals as real dependencies. This prevents `--include-code` from flagging documentation snippets, demos, parser fixtures, or tests as phantom packages.
+
 ## [1.6.0] - 2026-07-09
 
 ### Added
