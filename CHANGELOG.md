@@ -3,6 +3,16 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.9] - 2026-07-09
+
+### Fixed
+
+- A disabled button's tooltip was dimmed along with the button, because the button was faded with opacity, which also fades its tooltip. Since the tooltip is exactly what explains why a button is disabled, it now stays fully readable: the disabled look comes from muted color and the dashed border instead of opacity.
+
+### Changed
+
+- Tooltips are no longer shown on touch devices (`@media (hover: none)`), where a tap would briefly flash the tooltip, which was more distracting than helpful.
+
 ## [1.5.8] - 2026-07-09
 
 ### Fixed
