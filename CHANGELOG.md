@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.7] - 2026-07-09
+
+### Fixed
+
+- Made the button tooltip positioning defensive: the helper that anchors a tooltip to its button now has zero specificity, so it can never override a button's own layout. This has no visible effect here, but it fixes a sibling tool whose absolutely-positioned clear button was being knocked out of place.
+
 ## [1.5.6] - 2026-07-09
 
 ### Fixed
