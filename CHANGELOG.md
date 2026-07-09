@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.17] - 2026-07-09
+
+### Changed
+
+- Light mode's status colors are livelier and now measurably meet WCAG AA. The olive green, brown amber, and muted red came from darkening alone, which made them muddy; they are replaced with fully saturated deep equivalents (accent #4c7a00, green #1d7a25, orange #ba4700, red #c62a22), the soft chip tints were eased to match, primary buttons in light mode use white text on the deep accent, and light muted text was deepened one step. Measured on the rendered page, every status pill, link, button label, and muted text now sits at 4.5:1 or better; the previous accent and the muted text on tinted chips quietly failed. Dark mode is untouched.
+
 ## [1.5.16] - 2026-07-09
 
 ### Added
@@ -267,6 +273,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.5.17]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.17
 [1.5.16]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.16
 [1.5.15]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.15
 [1.5.14]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.14
