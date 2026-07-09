@@ -453,7 +453,7 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
       return {
         level: "warn",
         title: `Real package, but on ${there}, not ${here}`,
-        detail: `Not found on ${here}, yet a package with this name exists on ${there}. A bare list of names is checked against one registry at a time; this one looks like it belongs to the other. Paste a package.json or requirements.txt to remove the guesswork.`
+        detail: `Not found on ${here}, yet a package with this name exists on ${there}. A bare list of names is checked against one registry at a time; this one looks like it belongs to the other. Paste a package.json, requirements.txt, or pyproject.toml to remove the guesswork.`
       };
     }
     return {

@@ -289,7 +289,7 @@ async function main() {
       process.exit(0);
     }
     if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], message: "No manifest found" }));
-    else console.error("No package.json or requirements.txt found here. Point at a project directory" +
+    else console.error("No package.json, requirements.txt, or pyproject.toml found here. Point at a project directory" +
       (opts.includeCode ? "." : ", or pass --include-code to scan source imports."));
     process.exit(2);
   }

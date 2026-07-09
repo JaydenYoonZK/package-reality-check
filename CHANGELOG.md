@@ -3,6 +3,18 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.4] - 2026-07-09
+
+### Fixed
+
+- The "no manifest found" error and the browser's wrong-ecosystem hint listed only `package.json` and `requirements.txt`, even though `pyproject.toml` has been supported since 1.5.0. Both now mention it, so a user pointing the tool at a Python project gets accurate guidance.
+
+### Changed
+
+- Refreshed the screenshot in the README: it now shows the current interface and real results, including the "did you mean" hint, rather than a pre-check state from an older version of the tool.
+- Added a dedicated 1200x630 social-share card, so links shared to Slack, X, or LinkedIn render a clean preview instead of a cropped screenshot.
+- Added the `bugs` URL to package.json so `npm bugs` and the package page point at the issue tracker.
+
 ## [1.5.3] - 2026-07-09
 
 ### Fixed
