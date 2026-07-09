@@ -25,6 +25,7 @@ function syncControls() {
   const hasContent = input.value.trim().length > 0;
   checkBtn.disabled = running || !hasContent;
   clearBtn.disabled = !hasContent;
+  $("paste").classList.toggle("primary", !hasContent); // green when the box is empty (paste is the next step)
 }
 input.addEventListener("input", syncControls);
 
