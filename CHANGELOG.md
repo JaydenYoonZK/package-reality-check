@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.5] - 2026-07-09
+
+### Changed
+
+- The browser tool's Check and Clear buttons are now disabled when the input box is empty, since there is nothing to check and nothing to clear. Disabled buttons are visibly dimmed with a dashed edge and a not-allowed cursor. Clear stays available while a check is running, so you can reset mid-run; Check is disabled only while it is busy or the box is empty.
+
 ## [1.5.4] - 2026-07-09
 
 ### Fixed
