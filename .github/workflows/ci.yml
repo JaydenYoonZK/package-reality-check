@@ -25,8 +25,8 @@ jobs:
           - os: macos-latest
             node: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
       # Zero dependencies: nothing to install. The test suite is fully
