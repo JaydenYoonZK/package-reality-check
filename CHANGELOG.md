@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.13] - 2026-07-09
+
+### Fixed
+
+- On phones the menu no longer hides items behind an invisible horizontal scroll. Below 720px it wraps onto its own row under the brand with every item visible and centered, and the bar scrolls away with the page instead of pinning several rows to a small screen; the back-to-top button brings it back into reach. Desktop keeps the single sticky row, and section jumps account for the new offsets.
+
 ## [1.5.12] - 2026-07-09
 
 ### Fixed
@@ -243,6 +249,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.5.13]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.13
 [1.5.12]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.12
 [1.4.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.0
 [1.3.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.1
