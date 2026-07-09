@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.10] - 2026-07-09
+
+### Changed
+
+- The Paste button is now highlighted (green) only when the input box is empty, which is the moment pasting is the natural next step, and calms to a neutral button once there is content to work with. Browsers do not allow reading the clipboard without a click, so a button cannot truthfully light up because something was copied elsewhere; tying the highlight to the empty box gives it an honest, useful meaning instead.
+
 ## [1.5.9] - 2026-07-09
 
 ### Fixed
