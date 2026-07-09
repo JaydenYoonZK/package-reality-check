@@ -10,6 +10,10 @@ Check that your dependencies actually exist and are plausibly legitimate. Catche
   <a href="LICENSE"><img src="https://img.shields.io/github/license/JaydenYoonZK/package-reality-check?style=for-the-badge" alt="MIT License"></a>
 </p>
 
+<a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
+  <img src="docs/assets/preview.png" alt="Package Reality Check shown in light and dark themes, the hero with its illustration flagging an invented package alongside real ones" width="100%">
+</a>
+
 ```console
 $ npx github:JaydenYoonZK/package-reality-check
 
@@ -96,10 +100,6 @@ The contract a pipeline can rely on:
 ```
 
 `level` is one of `ok`, `warn`, `danger`, `phantom`, or `error` (could not be checked). `unreadable` is present only when a manifest could not be parsed.
-
-<a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
-  <img src="docs/assets/preview.png" alt="Package Reality Check shown in light and dark themes, the hero with its illustration flagging an invented package alongside real ones" width="100%">
-</a>
 
 ## Browser tool
 
