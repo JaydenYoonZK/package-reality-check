@@ -1,6 +1,6 @@
 {
   "name": "package-reality-check",
-  "version": "1.5.16",
+  "version": "1.5.17",
   "description": "Check that your dependencies actually exist and are plausibly legitimate. Catches AI-hallucinated (slopsquatted) packages and fresh typosquats before you install them. Browser tool and zero-dependency CLI.",
   "type": "module",
   "bin": {
