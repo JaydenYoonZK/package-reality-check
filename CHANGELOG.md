@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.5.11] - 2026-07-09
+
+### Changed
+
+- The Paste button is now the primary (green) action at all times, rather than only when the box is empty. Pasting overwrites the box, so there is no need to Clear first; on touch devices the existing text is now selected before pasting so a native paste replaces it too.
+
 ## [1.5.10] - 2026-07-09
 
 ### Changed
