@@ -98,7 +98,7 @@ The contract a pipeline can rely on:
 `level` is one of `ok`, `warn`, `danger`, `phantom`, or `error` (could not be checked). `unreadable` is present only when a manifest could not be parsed.
 
 <a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
-  <img src="docs/assets/preview.png" alt="Package Reality Check flagging invented packages from an AI-generated requirements.txt, with did-you-mean hints" width="100%">
+  <img src="docs/assets/preview.png" alt="Package Reality Check shown in light and dark themes, the hero with its illustration flagging an invented package alongside real ones" width="100%">
 </a>
 
 ## Browser tool
