@@ -148,11 +148,11 @@
     <label for="input" style="display:none">Dependencies to check</label>
     <textarea id="input" placeholder="Paste a package.json, a requirements.txt, a pyproject.toml, or code with imports..." spellcheck="false"></textarea>
     <div class="toolbar">
-      <button id="paste" class="primary" type="button">Paste &amp; check</button>
-      <button id="check" type="button" disabled>Check packages</button>
-      <button id="sample-req" type="button">Sample: requirements.txt</button>
-      <button id="sample-js" type="button">Sample: JS imports</button>
-      <button id="clear" type="button" disabled>Clear</button>
+      <button id="paste" class="primary" type="button" data-tip="Paste from your clipboard and check it right away">Paste &amp; check</button>
+      <button id="check" type="button" disabled data-tip="Check every dependency against npm and PyPI" data-tip-off="Paste or type some dependencies first">Check packages</button>
+      <button id="sample-req" type="button" data-tip="Load an example requirements.txt to try it">Sample: requirements.txt</button>
+      <button id="sample-js" type="button" data-tip="Load example JavaScript imports to try it">Sample: JS imports</button>
+      <button id="clear" type="button" disabled data-tip="Clear the box and start over" data-tip-off="Nothing to clear yet">Clear</button>
     </div>
   </div>
 

@@ -63,6 +63,11 @@ function rowHtml(dep, v, urls) {
 }
 
 async function run() {
+  // Sync first: run() is reached from the Check button, the samples, and the
+  // Paste button (which all set the value programmatically, firing no input
+  // event), and from paths that return early below. Doing it here keeps the
+  // buttons correct no matter how we got here.
+  syncControls();
   const { kind, deps } = extract(input.value);
   tbody.innerHTML = "";
   summary.innerHTML = "";
@@ -160,6 +165,16 @@ $("sample-js").addEventListener("click", () => {
 
 const pasteBtn = $("paste");
 pasteBtn.addEventListener("click", async () => {
+    // On touch devices the async clipboard read triggers a system permission
+    // popup that needs a second tap. Instead focus the box, where iOS offers a
+    // native one-tap Paste on an empty field. Desktop keeps one-click paste.
+    if (matchMedia("(pointer: coarse)").matches) {
+      input.focus();
+      const p = pasteBtn.textContent;
+      pasteBtn.textContent = "Now paste into the box";
+      setTimeout(() => { pasteBtn.textContent = p; }, 2600);
+      return;
+    }
   try {
     const text = await navigator.clipboard.readText();
     if (text) {
