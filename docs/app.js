@@ -1,5 +1,5 @@
-import { extract, verdict, registryUrls } from "./checker.js?v=20260709n";
-import { fetchFacts } from "./registry.js?v=20260709n";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.0";
+import { fetchFacts } from "./registry.js?v=1.7.0";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -21,12 +21,20 @@ const CONCURRENCY = 6;
 // disabled while a check is running, but Clear stays usable so you can reset
 // mid-run. Kept in sync on every input, sample, paste, run, and clear.
 let running = false;
+let runId = 0;
 function syncControls() {
   const hasContent = input.value.trim().length > 0;
   checkBtn.disabled = running || !hasContent;
   clearBtn.disabled = !hasContent;
 }
-input.addEventListener("input", syncControls);
+input.addEventListener("input", () => {
+  if (running) {
+    runId++;
+    running = false;
+    results.hidden = true;
+  }
+  syncControls();
+});
 
 // Escape for HTML text and double-quoted attributes (covers & < > " ').
 const esc = (s) => String(s)
@@ -63,10 +71,8 @@ function rowHtml(dep, v, urls) {
 }
 
 async function run() {
-  // Sync first: run() is reached from the Check button, the samples, and the
-  // Paste button (which all set the value programmatically, firing no input
-  // event), and from paths that return early below. Doing it here keeps the
-  // buttons correct no matter how we got here.
+  const currentRun = ++runId;
+  running = false;
   syncControls();
   const { kind, deps } = extract(input.value);
   tbody.innerHTML = "";
@@ -102,9 +108,10 @@ async function run() {
   const queue = list.map((dep, i) => ({ dep, i }));
 
   async function worker() {
-    while (queue.length) {
+    while (queue.length && currentRun === runId) {
       const { dep, i } = queue.shift();
       const facts = await fetchFacts(dep);
+      if (currentRun !== runId) return;
       const v = facts.error
         ? { level: "error", title: "Could not check", detail: facts.error + ". Try again in a moment." }
         : verdict(dep.name, dep.ecosystem, facts);
@@ -115,6 +122,7 @@ async function run() {
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  if (currentRun !== runId) return;
 
   // Order rows by severity once everything is in.
   const indexed = rows.map((tr, i) => ({ tr, level: outcomes[i] ?? "error" }));
@@ -125,10 +133,12 @@ async function run() {
   const phantoms = count("phantom");
   const dangers = count("danger");
   const warns = count("warn");
+  const errors = count("error");
   const chips = [];
   if (phantoms) chips.push(`<span class="chip red"><strong>${phantoms}</strong> phantom or invalid</span>`);
   if (dangers) chips.push(`<span class="chip red"><strong>${dangers}</strong> dangerous</span>`);
   if (warns) chips.push(`<span class="chip amber"><strong>${warns}</strong> worth a closer look</span>`);
+  if (errors) chips.push(`<span class="chip amber"><strong>${errors}</strong> could not be checked</span>`);
   if (!chips.length) chips.push(`<span class="chip ok"><strong>All ${list.length}</strong> packages check out</span>`);
   summary.innerHTML = chips.join("");
   running = false;
@@ -142,7 +152,7 @@ input.addEventListener("keydown", (e) => {
 
 $("sample-req").addEventListener("click", () => {
   input.value = [
-    "# From an AI-generated setup guide",
+    "# From an unverified setup guide",
     "fastapi==0.111.0",
     "uvicorn[standard]>=0.29",
     "reqeusts",
@@ -154,7 +164,7 @@ $("sample-req").addEventListener("click", () => {
 
 $("sample-js").addEventListener("click", () => {
   input.value = [
-    '// Imports suggested by a code assistant',
+    '// Unverified dependency suggestions',
     'import express from "express";',
     'import { merge } from "lodahs";',
     'import { createSecureToken } from "express-jwt-secure-tokens";',
@@ -205,6 +215,8 @@ input.addEventListener("paste", () => {
 });
 
 clearBtn.addEventListener("click", () => {
+  runId++;
+  running = false;
   input.value = "";
   results.hidden = true;
   syncControls();
@@ -219,16 +231,19 @@ if (new URLSearchParams(location.search).has("demo")) {
 syncControls();
 
 const toTop = document.getElementById("to-top");
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 if (toTop) {
   addEventListener("scroll", () => {
     toTop.classList.toggle("show", scrollY > 600);
   }, { passive: true });
-  toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: "smooth" }));
+  toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: reducedMotion.matches ? "auto" : "smooth" }));
 }
 
 const themeToggle = document.getElementById("theme-toggle");
 function syncThemeIcon() {
-  themeToggle.textContent = document.documentElement.dataset.theme === "light" ? "🌙" : "☀️";
+  const isLight = document.documentElement.dataset.theme === "light";
+  themeToggle.textContent = isLight ? "🌙" : "☀️";
+  themeToggle.setAttribute("aria-label", `Switch to ${isLight ? "dark" : "light"} mode`);
 }
 themeToggle.addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
@@ -267,7 +282,7 @@ addEventListener("resize", syncActiveLink, { passive: true });
 syncActiveLink();
 
 const scene = document.querySelector(".bg-scene");
-if (scene && matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+if (scene && matchMedia("(pointer: fine)").matches && !reducedMotion.matches) {
   let rafId = 0;
   addEventListener("mousemove", (e) => {
     if (rafId) return;
@@ -279,7 +294,7 @@ if (scene && matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-redu
   }, { passive: true });
 }
 
-if (scene && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+if (scene && !reducedMotion.matches) {
   let scrollRaf = 0;
   const applyScroll = () => {
     scrollRaf = 0;

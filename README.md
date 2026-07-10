@@ -1,9 +1,10 @@
-# Package Reality Check 👻
+# Package Reality Check
 
-Check that your dependencies actually exist and are plausibly legitimate. Catches AI-hallucinated (slopsquatted) packages and fresh typosquats **before you install them**, in your CI or your terminal. A zero-dependency CLI and a browser tool.
+Verify dependency names against npm and PyPI before installation. Package Reality Check flags missing packages, security placeholders, fresh lookalikes, and other signals that deserve review. Use it as a GitHub Action, zero-dependency CLI, or browser tool.
 
 <p>
   <a href="#cli"><img src="https://img.shields.io/badge/CLI-npx-abcf37?style=for-the-badge&logo=npm&logoColor=black" alt="Run the CLI"></a>
+  <a href="#github-action"><img src="https://img.shields.io/badge/GitHub%20Action-use-2465b8?style=for-the-badge&logo=githubactions&logoColor=white" alt="Use the GitHub Action"></a>
   <a href="https://jaydenyoonzk.github.io/package-reality-check/"><img src="https://img.shields.io/badge/Browser%20tool-open-544741?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open the browser tool"></a>
   <a href="https://github.com/JaydenYoonZK/package-reality-check/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/JaydenYoonZK/package-reality-check/ci.yml?style=for-the-badge&label=tests" alt="CI status"></a>
   <a href="https://github.com/JaydenYoonZK/package-reality-check"><img src="https://img.shields.io/github/stars/JaydenYoonZK/package-reality-check?style=for-the-badge&logo=github" alt="GitHub stars"></a>
@@ -11,7 +12,7 @@ Check that your dependencies actually exist and are plausibly legitimate. Catche
 </p>
 
 <a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
-  <img src="docs/assets/preview.png" alt="Package Reality Check shown in light and dark themes, the hero with its illustration flagging an invented package alongside real ones" width="100%">
+  <img src="docs/assets/preview.png" alt="Package Reality Check showing its dependency input and npm and PyPI verdict workflow" width="100%">
 </a>
 
 ```console
@@ -22,8 +23,8 @@ $ npx github:JaydenYoonZK/package-reality-check
   ✗ npm  express-jwt-secure-tokens  PHANTOM  Not found in the registry
        No such package. If an AI tool suggested this name, it likely invented it.
   ✗ npm  lodahs                     DANGER  Replaced by a security placeholder
-       The registry has replaced this package with an empty "security holding"
-       version, which means the original was taken down for malware.
+       npm serves this name as an empty "security holding" version. Do not
+       install it without reviewing the package history.
   ! npm  react-codeshift            CHECK  Exists, worth a closer look
        24 downloads last month. Young or rarely downloaded packages deserve
        a quick source review.
@@ -34,19 +35,48 @@ $ npx github:JaydenYoonZK/package-reality-check
   ✗ 2 packages could not be trusted. Do not install until you have verified each one.
 ```
 
-Every line above is a real result: `lodahs` is not a hypothetical, it is a name that carried actual malware until npm seized it.
+Every line above comes from a live registry result. npm currently serves `lodahs` as a security-holding package rather than an installable release.
 
 ## Why this exists
 
-Code assistants hallucinate package names. A [2024 study of 576,000 generated code samples](https://arxiv.org/abs/2406.10279) found that nearly one in five suggested packages did not exist, across more than 200,000 unique invented names. Because models repeat the same fake names, attackers register them with malicious payloads and wait. The security community calls it **slopsquatting**, and it is not theoretical: in early 2026 the hallucinated package `react-codeshift` was registered and [spread to 237 repositories through AI agent files](https://www.techtimes.com/articles/319457/20260701/ai-coding-agents-skip-package-verification-attackers-are-exploiting-it.htm).
+Code assistants sometimes recommend packages that do not exist. A study covering 576,000 generated code samples reported average hallucination rates of at least 5.2% for commercial models and 21.7% for open-source models, with 205,474 unique invented package names. See the authors' [USENIX Security paper](https://www.usenix.org/system/files/usenixsecurity25-spracklen.pdf). Repeated names can become targets for slopsquatting: in January 2026, security researcher Charlie Eriksen found `react-codeshift` referenced by 237 repositories and [registered the unused npm name defensively](https://www.aikido.dev/blog/agent-skills-spreading-hallucinated-npx-commands).
 
-Here is the gap that makes this tool worth having: **a vulnerability scanner cannot flag a package that does not exist yet.** Socket, `npm audit`, and friends check known packages against advisory databases. But the most dangerous moment is when your AI assistant suggests a name that is not on the registry at all, because that is the name a squatter will claim next. Package Reality Check works one layer upstream: it verifies that each dependency is real and established before anything gets installed.
+Advisory scanners evaluate known packages and versions. They cannot warn about an invented name before someone registers it. Package Reality Check handles that earlier decision: whether a dependency name exists and whether its registry history warrants a closer look.
+
+<a id="github-action"></a>
+
+## GitHub Action
+
+Run the check before installation in pull requests:
+
+```yaml
+name: Dependency reality check
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: JaydenYoonZK/package-reality-check@v1
+        with:
+          include_code: true
+          fail_on: danger
+          # Approved private packages can be listed explicitly:
+          # ignore: "@company/private, pypi:internal-lib"
+```
+
+The Action runs on Node.js 24 and has no third-party runtime dependencies. `path`, `include_code`, `fail_on`, `ignore`, `json`, and `quiet` are available as inputs.
 
 <a id="cli"></a>
 
 ## Command line
 
-No install, nothing to trust. It runs from the repo and has **zero dependencies of its own** (a supply-chain tool should not be a supply-chain risk):
+Run the CLI directly from this repository. It has no third-party runtime dependencies:
 
 ```bash
 # scan the current project
@@ -57,6 +87,9 @@ npx github:JaydenYoonZK/package-reality-check ./my-app --include-code
 
 # machine-readable output for pipelines
 npx github:JaydenYoonZK/package-reality-check --json
+
+# allow an approved private package (repeat as needed)
+npx github:JaydenYoonZK/package-reality-check --ignore npm:@company/private
 ```
 
 It reads `package.json` (every dependency field), `requirements.txt`, and `pyproject.toml`, checks each dependency against the live npm and PyPI registries, and **exits non-zero when something cannot be trusted**, so it drops straight into CI:
@@ -68,8 +101,8 @@ It reads `package.json` (every dependency field), `requirements.txt`, and `pypro
 
 | Verdict | Meaning | Fails CI at |
 |---|---|---|
-| `PHANTOM` | Not in the registry, or not a valid package name. Likely invented; a squatter may claim it. | `--fail-on phantom` (default) |
-| `DANGER` | A fresh, low-download lookalike of a popular package, or a name the registry replaced with a "security holding" placeholder (its original was pulled for malware). | `--fail-on danger` |
+| `PHANTOM` | Not in the registry, or not a valid package name. Likely invented; a squatter may claim it. | default, `--fail-on phantom`, `--fail-on warn` |
+| `DANGER` | A fresh, low-download lookalike of a popular package, or an npm security-holding placeholder. | default (`--fail-on danger`), `--fail-on warn` |
 | `CHECK` | New, deprecated, barely downloaded, or one edit from a popular name. | `--fail-on warn` |
 | `OK` | Real and established. | never |
 
@@ -99,16 +132,17 @@ The contract a pipeline can rely on:
 }
 ```
 
-`level` is one of `ok`, `warn`, `danger`, `phantom`, or `error` (could not be checked). `unreadable` is present only when a manifest could not be parsed.
+`level` is one of `ok`, `warn`, `danger`, `phantom`, or `error` (could not be checked). `unreadable` is present only when a manifest could not be parsed. Explicitly allowed private packages appear in `ignored`.
 
 ## Browser tool
 
-Prefer to paste and look? The **[live tool](https://jaydenyoonzk.github.io/package-reality-check/)** ([demo](https://jaydenyoonzk.github.io/package-reality-check/?demo)) takes a `package.json`, `requirements.txt`, `pyproject.toml`, or code with imports and checks it straight from your browser against the registries. Nothing you paste is sent anywhere else, and a Content Security Policy on the page pins outbound connections to exactly npm and PyPI, so the browser itself refuses to send your dependency list to any other host.
+The **[live tool](https://jaydenyoonzk.github.io/package-reality-check/)** ([demo](https://jaydenyoonzk.github.io/package-reality-check/?demo)) accepts a `package.json`, `requirements.txt`, `pyproject.toml`, or source imports. Parsing stays in the current tab. Registry requests contain package names and are limited by the page's Content Security Policy to npm and PyPI.
 
 ## What it checks
 
 - `package.json` (every dependency field), `requirements.txt` (specifiers, extras, environment markers), `pyproject.toml` (PEP 621 dependencies and optional groups, Poetry tables, and build-system requires), and, with `--include-code`, raw JS/TS or Python source imports
 - Skips Node built-ins and the Python standard library, including modules removed in recent Python versions such as `telnetlib`
+- Maps common Python imports such as `yaml`, `PIL`, and `sklearn` to their PyPI distribution names
 - Queries npm and PyPI directly; when a name is missing from one registry but exists in the other, it says so rather than crying phantom, so a wrong-ecosystem guess never reads as an invented package
 - Flags packages that do not exist, are registered in the last 120 days, are barely downloaded, are deprecated, are within typo distance (transpositions included) of a curated pool of 240+ popular packages, or have been replaced by a registry "security holding" placeholder after a takedown
 - Validates every name first, so a manifest entry that is really a path, a URL, or an injection attempt is called out instead of being sent to the registry
@@ -130,14 +164,14 @@ npm test           # run the suite
 npm run coverage   # run with line and branch coverage
 ```
 
-81 tests cover manifest and import parsing (package.json, requirements.txt, pyproject.toml in both PEP 621 and Poetry layouts), BOM and truncated-file handling, malformed-manifest rejection, package-name validation, resistance to catastrophic-backtracking (ReDoS) input, control-character sanitization, stdlib filtering, PEP 503 normalization, transposition-aware typo distance, boundary-value checks on every verdict threshold, each verdict and registry-error path (including security-holding placeholders), the registry layer (with retries, the light-then-full fetch strategy, and network-error handling, all mocked and hermetic), the CLI's argument parsing, file discovery, and output, and integration tests that run the installed command as a subprocess and assert every exit code. The engine modules sit at 100% line coverage. CI runs it all on Node 18, 20, and 22 on Linux, plus Windows and macOS.
+The suite covers manifest and import parsing, malformed files, package-name validation, bounded hostile input, terminal sanitization, Python import mappings, typo distance, verdict boundaries, registry retries and error paths, CLI exit codes, Action inputs, and static-site metadata. Registry tests are mocked and do not use the network. CI runs Node.js 18, 20, 22, 24, and 26 on Linux, with Node.js 24 checks on Windows and macOS plus a local Action smoke test.
 
 ## Limitations worth knowing
 
 - Only npm and PyPI. Other ecosystems are tracked in [issues](https://github.com/JaydenYoonZK/package-reality-check/issues).
 - It checks the dependencies you declare, not the resolved lockfile tree. Transitive dependencies are your package manager's territory; this tool guards the moment a name enters your manifest.
 - A single run checks at most 2000 unique packages, so a huge or hostile manifest cannot turn a scan into an unbounded flood of registry requests. The overflow count is reported, never dropped silently.
-- Internal/private packages will show as PHANTOM, because the tool can only see public registries. That is also a nudge to protect those names.
+- Internal packages are not visible to public registries. Approve them explicitly with repeatable `--ignore` options or the Action's `ignore` input, and protect the same names from public registration.
 - Edit distance cannot read intent; occasional legitimate near-name packages will ask you for thirty seconds of judgment.
 - Corporate proxies: Node's built-in fetch does not read `HTTP_PROXY`/`HTTPS_PROXY` by default. On Node 24+ set `NODE_USE_ENV_PROXY=1`; on older versions run it from a network that can reach the registries directly.
 

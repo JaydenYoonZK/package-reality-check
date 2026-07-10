@@ -20,7 +20,7 @@ body:
     id: tool
     attributes:
       label: Which tool suggested it?
-      placeholder: e.g. ChatGPT, Copilot, Cursor
+      description: Optional. A product name and version help identify repeated suggestions.
   - type: textarea
     id: context
     attributes:

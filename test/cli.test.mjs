@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { parseArgs, collectDeps, render, makeColor, safeText, capDeps, MAX_PACKAGES } from "../bin/cli.mjs";
+import { parseArgs, collectDeps, render, makeColor, safeText, capDeps, exitCodeForResults, partitionIgnored, MAX_PACKAGES } from "../bin/cli.mjs";
 
 const noColor = makeColor(false);
 
@@ -26,6 +26,13 @@ test("safeText strips terminal control characters from untrusted names", () => {
   assert.ok(cleaned.includes("evil") && cleaned.includes("pkg"), "printable text is kept");
 });
 
+test("safeText strips bidirectional and invisible terminal formatting", () => {
+  const controls = "\u202E\u2066\u200B\uFEFF";
+  const cleaned = safeText(`safe${controls}name`);
+  for (const control of controls) assert.ok(!cleaned.includes(control));
+  assert.match(cleaned, /^safe.+name$/);
+});
+
 test("render does not emit raw escape sequences from a crafted package name", () => {
   const ESC = String.fromCharCode(27);
   const out = render([{ name: "x" + ESC + "[31mINJECT", ecosystem: "npm", level: "phantom", title: "t" }],
@@ -34,16 +41,41 @@ test("render does not emit raw escape sequences from a crafted package name", ()
 });
 
 test("parseArgs defaults and flags", () => {
-  assert.deepEqual(parseArgs([]).failOn, "phantom");
+  assert.deepEqual(parseArgs([]).failOn, "danger");
   assert.equal(parseArgs(["--json"]).json, true);
   assert.equal(parseArgs(["--include-code"]).includeCode, true);
   assert.equal(parseArgs(["-q"]).quiet, true);
   assert.equal(parseArgs(["--fail-on", "danger"]).failOn, "danger");
   assert.equal(parseArgs(["--fail-on=warn"]).failOn, "warn");
+  assert.deepEqual(parseArgs(["--ignore", "@company/private", "--ignore=pypi:internal_lib"]).ignore,
+    ["@company/private", "pypi:internal_lib"]);
   assert.equal(parseArgs(["./myproj"]).path, "./myproj");
   assert.equal(parseArgs(["--bogus"]).badFlag, "--bogus");
   assert.equal(parseArgs(["--fail-on"]).failOn, undefined, "missing value is detectable");
+  assert.equal(parseArgs(["--ignore"]).missingIgnore, true);
   assert.equal(parseArgs(["a", "b"]).extraArg, "b", "extra positional is surfaced, not swallowed");
+});
+
+test("approved private packages can be ignored by name and ecosystem", () => {
+  const deps = [
+    { name: "@company/private", ecosystem: "npm" },
+    { name: "internal-lib", ecosystem: "pypi" },
+    { name: "internal-lib", ecosystem: "npm" },
+    { name: "express", ecosystem: "npm" }
+  ];
+  const result = partitionIgnored(deps, ["@company/private", "pypi:internal_lib"]);
+  assert.deepEqual(result.ignored.map(dep => `${dep.ecosystem}:${dep.name}`),
+    ["npm:@company/private", "pypi:internal-lib"]);
+  assert.deepEqual(result.included.map(dep => `${dep.ecosystem}:${dep.name}`),
+    ["npm:internal-lib", "npm:express"]);
+});
+
+test("default threshold fails danger and phantom findings", () => {
+  assert.equal(exitCodeForResults([{ level: "danger" }], parseArgs([]).failOn), 1);
+  assert.equal(exitCodeForResults([{ level: "phantom" }], parseArgs([]).failOn), 1);
+  assert.equal(exitCodeForResults([{ level: "warn" }], parseArgs([]).failOn), 0);
+  assert.equal(exitCodeForResults([{ level: "error" }], parseArgs([]).failOn), 2);
+  assert.equal(exitCodeForResults([{ level: "phantom" }], "never"), 0);
 });
 
 test("collectDeps reads pyproject.toml", () => {

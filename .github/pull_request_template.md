@@ -7,3 +7,4 @@
 - [ ] `npm test` passes
 - [ ] Parsing or verdict changes have a test
 - [ ] Popular-package or stdlib list changes explain their source
+- [ ] CLI, Action, browser, security, and privacy effects were considered

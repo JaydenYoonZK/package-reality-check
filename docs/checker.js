@@ -335,9 +335,22 @@ export function parsePyproject(text) {
   return dedupe(out);
 }
 
-const PY_IMPORT = /^[ \t]*(?:import[ \t]+([\w.]+(?:[ \t]*,[ \t]*[\w.]+)*)|from[ \t]+([\w.]+)[ \t]+import)/gm;
+const PY_IMPORT = /^[ \t]*(?:import[ \t]+([^#\n]+)|from[ \t]+([.\w]+)[ \t]+import\b)/gm;
 const MAX_IMPORT_SCAN = 4000;
 const isIdent = (ch) => /[A-Za-z0-9_$]/.test(ch ?? "");
+
+// Python import names do not always match their PyPI distributions. Keep this
+// list deliberately small: every entry must be a stable, widely documented
+// mapping rather than a guess about which distribution provides a namespace.
+export const PY_IMPORT_DISTRIBUTIONS = Object.freeze({
+  PIL: "Pillow",
+  bs4: "beautifulsoup4",
+  cv2: "opencv-python",
+  dateutil: "python-dateutil",
+  dotenv: "python-dotenv",
+  sklearn: "scikit-learn",
+  yaml: "PyYAML"
+});
 
 function prevNonSpace(code, i) {
   for (let j = i - 1; j >= 0; j--) {
@@ -482,15 +495,74 @@ export function parseJsImports(code) {
   return dedupe(out);
 }
 
+// Mask Python strings and comments while preserving newlines and character
+// positions. This keeps import examples in docstrings from becoming package
+// findings without needing a Python runtime in the browser.
+function maskPythonLiterals(code) {
+  let out = "";
+  let quote = "";
+  let triple = false;
+  let comment = false;
+  const blank = (ch) => ch === "\n" ? "\n" : " ";
+
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    if (comment) {
+      out += blank(ch);
+      if (ch === "\n") comment = false;
+      continue;
+    }
+    if (quote) {
+      if (ch === "\\") {
+        out += " ";
+        if (i + 1 < code.length) out += blank(code[++i]);
+        continue;
+      }
+      if (triple && code.startsWith(quote.repeat(3), i)) {
+        out += "   ";
+        i += 2;
+        quote = "";
+        triple = false;
+        continue;
+      }
+      out += blank(ch);
+      if (!triple && ch === quote) quote = "";
+      continue;
+    }
+    if (ch === "#") {
+      comment = true;
+      out += " ";
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      triple = code.startsWith(ch.repeat(3), i);
+      out += triple ? "   " : " ";
+      if (triple) i += 2;
+      continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+
 export function parsePyImports(code) {
   const out = [];
-  for (const m of code.matchAll(PY_IMPORT)) {
+  for (const m of maskPythonLiterals(String(code)).matchAll(PY_IMPORT)) {
     const names = m[1] ? m[1].split(",") : [m[2]];
-    for (let n of names) {
-      n = n.trim().split(".")[0];
-      if (!n || n.startsWith(".")) continue;
-      if (PY_STDLIB.has(n)) continue;
-      out.push({ name: n, ecosystem: "pypi", spec: "", source: "import" });
+    for (const raw of names) {
+      const match = raw.trim().match(/^([A-Za-z_]\w*(?:\.\w+)*)/);
+      if (!match) continue;
+      const imported = match[1].split(".")[0];
+      if (!imported || PY_STDLIB.has(imported)) continue;
+      const distribution = PY_IMPORT_DISTRIBUTIONS[imported] || imported;
+      out.push({
+        name: distribution,
+        ecosystem: "pypi",
+        spec: "",
+        source: "import",
+        ...(distribution !== imported ? { alias: imported } : {})
+      });
     }
   }
   return dedupe(out);
@@ -599,7 +671,7 @@ export function verdict(name, ecosystem, facts, now = Date.now()) {
     return {
       level: "danger",
       title: "Replaced by a security placeholder",
-      detail: "The registry has replaced this package with an empty \"security holding\" version, which means the original was taken down for malware or a serious security problem. Do not install it. Find out what happened to this name before using it."
+      detail: "npm serves this name as an empty \"security holding\" version, a pattern used after package removals and security incidents. Do not install it without reviewing the package history."
     };
   }
   const flags = [];

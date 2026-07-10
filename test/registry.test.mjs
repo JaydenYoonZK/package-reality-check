@@ -191,12 +191,22 @@ test("fetchFacts pypi: a non-404 error (403) is an error verdict, not a phantom"
 
 test("fetchFacts pypi: a 404 is a phantom, and reports foundIn when the name is on npm", async () => {
   // pypi 404 for the package, but the cross-ecosystem npm check finds it.
-  stubFetch([
-    ["registry.npmjs.org/left-pad", () => ({ body: { "dist-tags": { latest: "1.3.0" } } })],
-  ]);
+  const requested = [];
+  globalThis.fetch = async (url) => {
+    requested.push(url);
+    if (url.includes("pypi.org/pypi/left-pad")) {
+      return { status: 404, ok: false, json: async () => ({ error: "Not found" }) };
+    }
+    if (url.endsWith("/left-pad/latest")) {
+      return { status: 200, ok: true, json: async () => ({ name: "left-pad", version: "1.3.0" }) };
+    }
+    throw new Error(`unexpected request: ${url}`);
+  };
   const found = await fetchFacts({ name: "left-pad", ecosystem: "pypi" });
   assert.equal(found.exists, false);
   assert.equal(found.foundIn, "other");
+  assert.ok(requested.some(url => url.endsWith("/left-pad/latest")));
+  assert.ok(!requested.some(url => url.endsWith("/left-pad")), "must not fetch npm's full package document");
 
   // pypi 404 and nowhere else either -> a pure phantom.
   stubFetch([]);

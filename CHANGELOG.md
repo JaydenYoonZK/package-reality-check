@@ -3,6 +3,28 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.0] - 2026-07-10
+
+### Added
+
+- A dependency-free GitHub Action with inputs for scan path, source imports, failure threshold, output mode, and approved private packages.
+- Repeatable `--ignore` options for explicitly approved private npm and PyPI packages.
+- Python import mappings for common modules whose names differ from their PyPI distributions.
+- Static site checks, `robots.txt`, `sitemap.xml`, and monthly Dependabot checks for GitHub Actions.
+
+### Changed
+
+- `DANGER` is now the default CLI and Action failure threshold.
+- CI now covers Node.js 18, 20, 22, 24, and 26 on Linux, plus Node.js 24 on Windows and macOS. Workflow actions are pinned to reviewed revisions.
+- The browser design now uses a restrained geometric scene without blurred gradient decorations.
+
+### Fixed
+
+- Python source scanning ignores strings, comments, and docstrings, and handles comma-separated aliases.
+- Cross-ecosystem npm existence checks use the lightweight `latest` endpoint.
+- Terminal and JSON output replace bidirectional and invisible formatting controls in untrusted names and paths.
+- Browser lookup failures no longer produce an all-clear summary, and newer checks supersede older in-flight checks.
+
 ## [1.6.1] - 2026-07-10
 
 ### Fixed
@@ -13,7 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- A Content Security Policy on the browser tool. Unlike the rest of the suite, this tool must reach the network, so instead of blocking it, the policy pins outbound connections to exactly npm and PyPI. Even if markup were ever injected, the browser would refuse to send your dependency list to any other host. Verified in a browser: the registry lookups still work and a request to any other origin is blocked.
+- Added a Content Security Policy that limits browser registry requests to npm and PyPI.
 
 ### Changed
 
@@ -21,77 +43,77 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Notes
 
-This release followed a full audit of the engine, including live checks against npm and PyPI. No correctness or security defects were found: scoped packages resolve correctly, the cheap-existence path holds for scoped names (no accidental multi-megabyte fetch), wrong-ecosystem guesses do not read as phantoms, established lookalikes are not flagged, and the parsers handle extras, environment markers, aliases, and Poetry, PEP 621, and build-system layouts. The prior hardening rounds (ReDoS, terminal-escape injection, the request cap, security-holding detection, and the 403-is-not-existence fix) remain in place.
+This release included live npm and PyPI checks for scoped packages, wrong-ecosystem names, established lookalikes, and supported manifest layouts.
 
 ## [1.5.17] - 2026-07-09
 
 ### Changed
 
-- Light mode's status colors are livelier and now measurably meet WCAG AA. The olive green, brown amber, and muted red came from darkening alone, which made them muddy; they are replaced with fully saturated deep equivalents (accent #4c7a00, green #1d7a25, orange #ba4700, red #c62a22), the soft chip tints were eased to match, primary buttons in light mode use white text on the deep accent, and light muted text was deepened one step. Measured on the rendered page, every status pill, link, button label, and muted text now sits at 4.5:1 or better; the previous accent and the muted text on tinted chips quietly failed. Dark mode is untouched.
+- Updated light-mode accent, status, button, chip, and muted-text colors to improve contrast. Dark mode was unchanged.
 
 ## [1.5.16] - 2026-07-09
 
 ### Added
 
-- The hero illustration now has a light-mode version. It is the same inline drawing recolored through the theme tokens, so it follows the theme toggle instantly and always stays in step with the palette. Dark mode is unchanged.
+- The inline hero illustration now follows light-theme color tokens. Dark mode was unchanged.
 
 ## [1.5.15] - 2026-07-09
 
 ### Fixed
 
-- Clicking a menu item now always highlights the item you clicked. The highlight was driven by an observer watching a band in the middle of the viewport, but a menu jump lands the section heading at the top, outside that band, so the green pill often stayed on a section the page had merely scrolled past. The active item is now computed directly from the scroll position: the last section whose heading sits above the reading line under the header, with the last section winning at the very bottom of the page.
+- Menu highlighting now follows the last section above the sticky-header reading line, including the final section at the bottom of the page.
 
 ## [1.5.14] - 2026-07-09
 
 ### Changed
 
-- The menu now sits in its own tinted band under the brand bar on every screen size, giving the header a clear hierarchy: brand and theme toggle on top, menu below, every item always visible. The whole header is sticky again on all devices, and section jumps measure the header instead of assuming its height, so they land exactly below it however many rows the menu wraps to.
+- Moved the menu to a wrapping row below the brand bar. Section jumps now measure the sticky header height.
 
 ## [1.5.13] - 2026-07-09
 
 ### Fixed
 
-- On phones the menu no longer hides items behind an invisible horizontal scroll. Below 720px it wraps onto its own row under the brand with every item visible and centered, and the bar scrolls away with the page instead of pinning several rows to a small screen; the back-to-top button brings it back into reach. Desktop keeps the single sticky row, and section jumps account for the new offsets.
+- On narrow screens, menu items wrap into a centered row instead of using horizontal scrolling.
 
 ## [1.5.12] - 2026-07-09
 
 ### Fixed
 
-- The Paste button works on iPhone and iPad again. The previous touch flow skipped the iOS clipboard confirmation and waited for a manual paste that most people never discover, so the button looked dead. The clipboard is now requested the same way on every device: iOS shows its Paste confirmation at the tap point, and confirming it fills the box and runs the check in one motion. If the read is declined, the box is focused with a hint and the check runs by itself as soon as a paste lands. An empty clipboard now says so.
+- The Paste button now requests clipboard access directly on iPhone and iPad. If access is declined, the input is focused and checking starts after a manual paste.
 
 ## [1.5.11] - 2026-07-09
 
 ### Changed
 
-- The Paste button is now the primary (green) action at all times, rather than only when the box is empty. Pasting overwrites the box, so there is no need to Clear first; on touch devices the existing text is now selected before pasting so a native paste replaces it too.
+- The Paste button is now the primary action and replaces existing input.
 
 ## [1.5.10] - 2026-07-09
 
 ### Changed
 
-- The Paste button is now highlighted (green) only when the input box is empty, which is the moment pasting is the natural next step, and calms to a neutral button once there is content to work with. Browsers do not allow reading the clipboard without a click, so a button cannot truthfully light up because something was copied elsewhere; tying the highlight to the empty box gives it an honest, useful meaning instead.
+- The Paste button used the primary color only when the input was empty. This behavior was replaced in v1.5.11.
 
 ## [1.5.9] - 2026-07-09
 
 ### Fixed
 
-- A disabled button's tooltip was dimmed along with the button, because the button was faded with opacity, which also fades its tooltip. Since the tooltip is exactly what explains why a button is disabled, it now stays fully readable: the disabled look comes from muted color and the dashed border instead of opacity.
+- Disabled buttons now use muted colors instead of opacity so their tooltips remain readable.
 
 ### Changed
 
-- Tooltips are no longer shown on touch devices (`@media (hover: none)`), where a tap would briefly flash the tooltip, which was more distracting than helpful.
+- Tooltips are hidden on devices without hover support.
 
 ## [1.5.8] - 2026-07-09
 
 ### Fixed
 
-- The browser tool's stylesheet and script are now referenced with a version query, so a browser that cached an older copy fetches the current one after a deploy instead of serving stale files. The CLI is unaffected.
+- Added version queries to browser CSS and JavaScript references.
 
 ## [1.5.7] - 2026-07-09
 
 ### Fixed
 
-- Made the button tooltip positioning defensive: the helper that anchors a tooltip to its button now has zero specificity, so it can never override a button's own layout. This has no visible effect here, but it fixes a sibling tool whose absolutely-positioned clear button was being knocked out of place.
+- Tooltip positioning now uses a zero-specificity selector.
 
 ## [1.5.6] - 2026-07-09
 
@@ -112,7 +134,7 @@ This release followed a full audit of the engine, including live checks against 
 
 ### Changed
 
-- The browser tool's Check and Clear buttons are now disabled when the input box is empty, since there is nothing to check and nothing to clear. Disabled buttons are visibly dimmed with a dashed edge and a not-allowed cursor. Clear stays available while a check is running, so you can reset mid-run; Check is disabled only while it is busy or the box is empty.
+- Check and Clear are disabled when the input is empty. Check is also disabled during a lookup.
 
 ## [1.5.4] - 2026-07-09
 
@@ -122,8 +144,7 @@ This release followed a full audit of the engine, including live checks against 
 
 ### Changed
 
-- Refreshed the screenshot in the README: it now shows the current interface and real results, including the "did you mean" hint, rather than a pre-check state from an older version of the tool.
-- Added a dedicated 1200x630 social-share card, so links shared to Slack, X, or LinkedIn render a clean preview instead of a cropped screenshot.
+- Refreshed the README screenshot and added a 1200x630 social image.
 - Added the `bugs` URL to package.json so `npm bugs` and the package page point at the issue tracker.
 
 ## [1.5.3] - 2026-07-09
@@ -134,7 +155,7 @@ This release followed a full audit of the engine, including live checks against 
 
 ### Changed
 
-- Test suite expanded from 68 to 79 tests, driven by a coverage measurement. Added boundary-value tests that pin every verdict threshold (new-package at 120 days, low-downloads at 500, established at 20000 downloads and 365 days) one unit either side of the line, tests for the previously-uncovered verdict and registry-error branches, and `npm run coverage`. The engine modules are now at 100% line coverage.
+- Added boundary tests for every verdict threshold, registry error paths, and `npm run coverage`.
 - Registry tests are now hermetic: an un-mocked network call fails loudly instead of silently reaching the internet, and the real `fetch` is restored after each test, so the suite is order-independent.
 
 ## [1.5.2] - 2026-07-09
@@ -146,7 +167,7 @@ This release followed a full audit of the engine, including live checks against 
 
 ### Notes
 
-This release followed an offensive-security pass. Confirmed with proof-of-concept inputs and locked in with regression tests: no catastrophic-backtracking (ReDoS) in any parser (package.json, requirements.txt, pyproject.toml, source imports, name validation) even at 200k-character inputs; no prototype pollution through crafted `__proto__` or `constructor` keys; and no terminal-escape injection through any verdict message (the package name reaches the terminal only through the sanitized column).
+Regression tests cover modifier-heavy parser input, crafted object keys, and terminal control characters.
 
 ## [1.5.1] - 2026-07-09
 
@@ -158,7 +179,7 @@ This release followed an offensive-security pass. Confirmed with proof-of-concep
 
 ### Changed
 
-- The README console example is now the verbatim output of a real run. The old example had drifted: `lodahs` is no longer a mild "one edit away" note, it is a DANGER, because npm seized that name after actual malware shipped under it.
+- Updated the README console example to match current registry verdicts, including npm's security-holding response for `lodahs`.
 - The README documents the exit-code table and the `--json` output shape, states the typo pool size precisely (240+ curated names), and notes that the tool checks declared dependencies, not the resolved lockfile tree.
 
 ### Fixed
@@ -188,7 +209,7 @@ This release followed an offensive-security pass. Confirmed with proof-of-concep
 
 ### Added
 
-- Detects packages that npm has replaced with a "security holding" placeholder (published as `x.y.z-security`, described "security holding package"). These are names whose original package was pulled for malware or a serious security issue, such as `flatmap-stream` from the event-stream incident. They are now flagged `DANGER` instead of a mild low-download note.
+- Detects npm security-holding placeholders (a `-security` version or the description "security holding package") and flags them `DANGER`.
 - Validates every dependency name before any lookup. A manifest entry that is really a path, a URL, or an injection attempt (`../../-/npm/v1/...`, `foo?x=1`) is reported as invalid rather than being sent to the registry.
 
 ### Fixed
@@ -201,9 +222,9 @@ This release followed an offensive-security pass. Confirmed with proof-of-concep
 
 ### Fixed
 
-- Large packages are no longer wrongly reported as uncheckable. A package with a long release history has a registry document of many megabytes (`@types/node` is about 11 MB), which could exceed the request timeout and read as "could not check". npm lookups now use the tiny `latest` manifest for existence and the download count to judge whether a package is established, and only fetch the full document for a creation date when a package is not already established (those are always small). Scoped packages like `@types/node` and `@babel/core` now resolve quickly and correctly.
-- Fixed catastrophic backtracking (a ReDoS) in the JavaScript import scanner used by `--include-code`. A source file with `import`, a long run of whitespace, and no closing quote could hang the tool. The pattern was rewritten to a bounded, non-overlapping form; pathological input now completes in milliseconds. As a bonus, property accesses such as `obj.require("x")` are no longer misread as imports.
-- Terminal escape sequences in a dependency name or file path are now stripped before display, so a crafted `package.json` cannot clear your screen, set the terminal title, or inject fake output when scanned. Machine (`--json`) output was already safe.
+- Established npm packages now use the small `latest` manifest and downloads endpoint instead of always fetching full package history.
+- Replaced a backtracking-prone JavaScript import pattern with a bounded scanner. Property calls such as `obj.require("x")` are no longer treated as imports.
+- Terminal control characters in dependency names and file paths are replaced before human-readable output.
 - A malformed `package.json` whose top level is not an object, or whose dependency block is a string or array, is now rejected as unparseable instead of yielding junk package names or a false clean pass.
 - Corrected the age wording in a package's details ("1 year", not "1 years"; never "NaN days").
 
@@ -216,7 +237,7 @@ This release followed an offensive-security pass. Confirmed with proof-of-concep
 ### Fixed
 
 - A `package.json` saved with a UTF-8 byte-order mark (what many Windows editors write) is now parsed correctly instead of being silently skipped. A BOM is no longer mistaken for a broken file.
-- A manifest that cannot be parsed (a truncated or malformed `package.json` or requirements file) is now reported as such and exits with code 2, rather than reading as "no dependencies, nothing to worry about." A security tool must never give a clean bill of health for a file it could not read. When other manifests parse fine, the unreadable ones are noted and the scan continues.
+- A manifest that cannot be parsed is reported and exits with code 2 when nothing else can be checked. Other readable manifests are still scanned.
 
 ## [1.4.0] - 2026-07-08
 
@@ -243,7 +264,7 @@ This release followed an offensive-security pass. Confirmed with proof-of-concep
 
 - A zero-dependency command-line interface. Run `npx github:JaydenYoonZK/package-reality-check` in a project to scan its package.json and requirements.txt against the live npm and PyPI registries, with `--include-code` to also scan source imports.
 - CI integration: the CLI exits non-zero when a dependency cannot be trusted, tunable with `--fail-on phantom|danger|warn|never`. Includes `--json` output, `--quiet`, and color control.
-- A shared registry lookup module (`docs/registry.js`) with request timeouts and bounded retries, so a real package is never mislabeled because of one dropped request.
+- A shared registry lookup module (`docs/registry.js`) with request timeouts and bounded retries.
 - 14 new tests covering the registry layer (mocked, offline) and the CLI's parsing, file discovery, and rendering, bringing the suite to 29.
 
 ### Notes
@@ -254,12 +275,12 @@ This release followed an offensive-security pass. Confirmed with proof-of-concep
 
 ### Added
 
-- Ambient 3D background scene with depth of field: eleven glass cubes and shaded spheres from overly large to tiny, near and far sphere pairs on both sides, blur increasing with distance, balanced across both margins, drifting on slow organic paths with wobbling multi-axis tumbles, twinkling star specks in three parallax depth layers with varied size and blur (dark mode only), mouse parallax, and scroll parallax that reveals deeper shapes as the page moves. CSS transforms only, hidden on small screens, adapted per theme, frozen under reduced motion.
+- Added a CSS background scene with geometric shapes, stars, pointer and scroll parallax, theme variants, a small-screen cutoff, and a reduced-motion state.
 - Sticky navigation bar with brand, section links that highlight as you scroll, and smooth anchor scrolling.
 - Light and dark mode toggle, persisted across visits, honoring the system preference on first visit, with a ?theme= URL override.
 - Animated header illustration in the suite's mini-window style, hidden on small screens to keep mobile content-first.
 - Scroll-to-top button that appears after scrolling.
-- Emoji accents on section headings.
+- Added section-heading accents. These were removed in a later design pass.
 
 ### Changed
 
@@ -293,6 +314,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.0
 [1.6.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.1
 [1.6.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.0
 [1.5.17]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.17
@@ -301,6 +323,20 @@ First stable release.
 [1.5.14]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.14
 [1.5.13]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.13
 [1.5.12]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.12
+[1.5.11]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.11
+[1.5.10]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.10
+[1.5.9]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.9
+[1.5.8]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.8
+[1.5.7]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.7
+[1.5.6]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.6
+[1.5.4]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.4
+[1.5.3]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.3
+[1.5.2]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.2
+[1.5.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.1
+[1.5.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.0
+[1.4.3]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.3
+[1.4.2]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.2
+[1.4.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.1
 [1.4.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.4.0
 [1.3.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.1
 [1.3.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.3.0

@@ -1,0 +1,37 @@
+name: Package Reality Check
+description: Check declared dependencies against npm and PyPI before installing them.
+author: Jayden Yoon ZK
+
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  path:
+    description: Project directory to scan, relative to the workspace.
+    required: false
+    default: .
+  include_code:
+    description: Also scan JavaScript, TypeScript, and Python source imports.
+    required: false
+    default: "false"
+  fail_on:
+    description: "Lowest verdict that fails the step: danger, phantom, warn, or never."
+    required: false
+    default: danger
+  json:
+    description: Print machine-readable JSON instead of the terminal report.
+    required: false
+    default: "false"
+  quiet:
+    description: Hide OK rows while keeping findings and the summary.
+    required: false
+    default: "false"
+  ignore:
+    description: "Comma-separated approved private packages; npm:name and pypi:name are accepted."
+    required: false
+    default: ""
+
+runs:
+  using: node24
+  main: bin/action.mjs

@@ -14,7 +14,7 @@
 import { readFileSync, readdirSync, statSync, realpathSync } from "node:fs";
 import { join, resolve, relative, extname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parsePackageJson, parseRequirements, parsePyproject, parseJsImports, parsePyImports } from "../docs/checker.js";
+import { parsePackageJson, parseRequirements, parsePyproject, parseJsImports, parsePyImports, normalizePypi } from "../docs/checker.js";
 import { checkAll } from "../docs/registry.js";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -23,7 +23,7 @@ const VERSION = JSON.parse(readFileSync(join(HERE, "..", "package.json"), "utf8"
 /* ------------------------------- args ------------------------------- */
 
 export function parseArgs(argv) {
-  const opts = { path: ".", json: false, failOn: "phantom", includeCode: false, quiet: false, color: null };
+  const opts = { path: ".", json: false, failOn: "danger", includeCode: false, quiet: false, color: null, ignore: [] };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -34,6 +34,12 @@ export function parseArgs(argv) {
     else if (a === "--color") opts.color = true;
     else if (a === "--fail-on") opts.failOn = argv[++i];
     else if (a.startsWith("--fail-on=")) opts.failOn = a.slice("--fail-on=".length);
+    else if (a === "--ignore") {
+      const value = argv[++i];
+      if (value === undefined) opts.missingIgnore = true;
+      else opts.ignore.push(value);
+    }
+    else if (a.startsWith("--ignore=")) opts.ignore.push(a.slice("--ignore=".length));
     else if (a === "-h" || a === "--help") opts.help = true;
     else if (a === "-v" || a === "--version") opts.version = true;
     else if (a.startsWith("-")) { opts.badFlag = a; }
@@ -56,8 +62,10 @@ ARGUMENTS
 
 OPTIONS
   --fail-on <level>    Exit non-zero when a finding is at or above this level:
-                         phantom (default) | danger | warn | never
+                         danger (default) | phantom | warn | never
   --include-code       Also scan .js/.ts/.py imports, not just manifests
+  --ignore <name>      Skip an approved private package. Repeat as needed;
+                       use npm:name or pypi:name to limit the ecosystem
   --json               Machine-readable output
   --quiet, -q          Only print problems and the summary
   --no-color           Disable colored output
@@ -91,9 +99,9 @@ export function makeColor(enabled) {
 // Package names and file paths come from untrusted manifests. A crafted name
 // containing terminal escape sequences could clear the screen, set the title,
 // or inject fake output when printed. Replace every control character before
-// it reaches the terminal. (--json output is already safe: JSON escapes them.)
+// it reaches terminal or JSON output.
 export function safeText(s) {
-  return String(s).replace(/[\u0000-\u001f\u007f-\u009f]/g, "\uFFFD");
+  return String(s).replace(/[\u0000-\u001f\u007f-\u009f\u00ad\u061c\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/g, "\uFFFD");
 }
 
 // A generous ceiling on how many packages one run will look up. A real
@@ -107,6 +115,30 @@ export const MAX_PACKAGES = 2000;
 export function capDeps(deps, max = MAX_PACKAGES) {
   const overflow = deps.length - max;
   return overflow > 0 ? { toCheck: deps.slice(0, max), overflow } : { toCheck: deps, overflow: 0 };
+}
+
+function ignoreMatches(dep, entry) {
+  let ecosystem = null;
+  let name = String(entry).trim();
+  const qualified = name.match(/^(npm|pypi):(.*)$/i);
+  if (qualified) {
+    ecosystem = qualified[1].toLowerCase();
+    name = qualified[2];
+  }
+  if (!name || (ecosystem && ecosystem !== dep.ecosystem)) return false;
+  return dep.ecosystem === "pypi"
+    ? normalizePypi(name) === normalizePypi(dep.name)
+    : name.toLowerCase() === dep.name.toLowerCase();
+}
+
+/** Separate explicitly approved private packages from dependencies to check. */
+export function partitionIgnored(deps, entries = []) {
+  const ignored = [];
+  const included = [];
+  for (const dep of deps) {
+    (entries.some(entry => ignoreMatches(dep, entry)) ? ignored : included).push(dep);
+  }
+  return { included, ignored };
 }
 
 /* --------------------------- file discovery --------------------------- */
@@ -250,42 +282,63 @@ export function render(results, opts, c) {
   return lines.join("\n");
 }
 
+/** Convert completed results and a threshold into the documented CLI exit code. */
+export function exitCodeForResults(results, failOn) {
+  const checked = results.filter(r => r.level !== "error").length;
+  if (checked === 0 && results.length > 0) return 2;
+  const threshold = RANK[failOn] ?? 99;
+  const worst = results.reduce((max, result) => Math.max(max, RANK[result.level] ?? -1), -1);
+  return failOn !== "never" && worst >= threshold ? 1 : 0;
+}
+
 /* ------------------------------- main ------------------------------- */
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (opts.help) { console.log(HELP); process.exit(0); }
   if (opts.version) { console.log(VERSION); process.exit(0); }
-  if (opts.badFlag) { console.error(`Unknown option: ${opts.badFlag}\nRun with --help.`); process.exit(2); }
-  if (opts.extraArg) { console.error(`Unexpected argument: ${opts.extraArg}. Pass a single project directory.`); process.exit(2); }
+  if (opts.badFlag) { console.error(`Unknown option: ${safeText(opts.badFlag)}\nRun with --help.`); process.exit(2); }
+  if (opts.extraArg) { console.error(`Unexpected argument: ${safeText(opts.extraArg)}. Pass a single project directory.`); process.exit(2); }
   if (opts.failOn === undefined || opts.failOn === "") {
     console.error("Missing value for --fail-on. Use phantom, danger, warn, or never."); process.exit(2);
   }
+  if (opts.missingIgnore || opts.ignore.some(value => !String(value).trim())) {
+    console.error("Missing value for --ignore. Pass a package name, npm:name, or pypi:name."); process.exit(2);
+  }
   if (!["phantom", "danger", "warn", "never"].includes(opts.failOn)) {
-    console.error(`Invalid --fail-on value: ${opts.failOn}. Use phantom, danger, warn, or never.`); process.exit(2);
+    console.error(`Invalid --fail-on value: ${safeText(opts.failOn)}. Use phantom, danger, warn, or never.`); process.exit(2);
   }
 
   const root = resolve(opts.path);
   try { if (!statSync(root).isDirectory()) throw 0; }
-  catch { console.error(`Not a directory: ${opts.path}`); process.exit(2); }
+  catch { console.error(`Not a directory: ${safeText(opts.path)}`); process.exit(2); }
 
   const colorEnabled = opts.color !== null ? opts.color : (process.stdout.isTTY && !process.env.NO_COLOR);
   const c = makeColor(colorEnabled);
 
-  const { deps, manifests, unreadable } = collectDeps(root, opts.includeCode);
+  const collected = collectDeps(root, opts.includeCode);
+  const { included: deps, ignored } = partitionIgnored(collected.deps, opts.ignore);
+  const { manifests, unreadable } = collected;
   if (!deps.length) {
     // A manifest we found but could not parse must never read as a clean pass.
     if (unreadable.length) {
-      if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], unreadable, message: "Could not parse manifest" }));
+      if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], unreadable: unreadable.map(safeText), message: "Could not parse manifest" }));
       else console.error(c.yellow(`\n  Could not parse ${unreadable.length === 1 ? "this manifest" : "these manifests"}:`) +
         "\n" + unreadable.map(f => `    ${safeText(f)}`).join("\n") +
         c.dim("\n\n  Fix the file (a stray comma or a truncated line will do it) and run again.\n"));
       process.exit(2);
     }
     if (manifests > 0) {
-      // A real project that simply has no dependencies. That is a clean pass.
-      if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], message: "No dependencies to check" }));
-      else console.log(c.green("\n  ✓ No dependencies to check. Nothing to worry about.\n"));
+      const message = ignored.length
+        ? `All ${ignored.length} discovered dependencies were explicitly ignored`
+        : "No dependencies to check";
+      if (opts.json) console.log(JSON.stringify({
+        packages: 0,
+        ignored: ignored.map(dep => ({ name: safeText(dep.name), ecosystem: dep.ecosystem })),
+        results: [],
+        message
+      }));
+      else console.log(c.green(`\n  ✓ ${message}.\n`));
       process.exit(0);
     }
     if (opts.json) console.log(JSON.stringify({ packages: 0, results: [], message: "No manifest found" }));
@@ -295,6 +348,9 @@ async function main() {
   }
   if (unreadable.length && !opts.json && !opts.quiet) {
     process.stderr.write(c.yellow(`  Note: could not parse ${unreadable.map(safeText).join(", ")}, so those files were skipped.\n`));
+  }
+  if (ignored.length && !opts.json && !opts.quiet) {
+    process.stderr.write(c.dim(`  Ignoring ${ignored.length} explicitly approved package${ignored.length === 1 ? "" : "s"}: ${ignored.map(dep => safeText(dep.name)).join(", ")}\n`));
   }
 
   // Bound the work. Anything past the ceiling is reported, not silently dropped.
@@ -319,11 +375,13 @@ async function main() {
   if (opts.json) {
     console.log(JSON.stringify({
       packages: results.length,
-      unreadable: unreadable.length ? unreadable : undefined,
+      unreadable: unreadable.length ? unreadable.map(safeText) : undefined,
+      ignored: ignored.length ? ignored.map(dep => ({ name: safeText(dep.name), ecosystem: dep.ecosystem })) : undefined,
       notChecked: overflow > 0 ? overflow : undefined,
       results: results.map(r => ({
-        name: r.name, ecosystem: r.ecosystem, level: r.level,
-        title: r.title || null, detail: r.detail || null, source: r.source || null, file: r.file || null
+        name: safeText(r.name), ecosystem: r.ecosystem, level: r.level,
+        title: r.title || null, detail: r.detail || null, source: r.source || null,
+        file: r.file ? safeText(r.file) : null
       }))
     }, null, 2));
   } else {
@@ -332,13 +390,7 @@ async function main() {
 
   // If nothing could be checked (every lookup errored), we verified nothing.
   // Do not report success: exit 2 so CI treats it as an incomplete run.
-  const checked = results.filter(r => r.level !== "error").length;
-  if (checked === 0 && results.length > 0) process.exit(2);
-
-  const threshold = RANK[opts.failOn] ?? 99;
-  const worst = results.reduce((m, r) => Math.max(m, RANK[r.level] ?? -1), -1);
-  const fail = opts.failOn !== "never" && worst >= threshold;
-  process.exit(fail ? 1 : 0);
+  process.exit(exitCodeForResults(results, opts.failOn));
 }
 
 // Run main() only when invoked as a command, not when imported by tests.
@@ -352,5 +404,5 @@ function isEntryPoint() {
   }
 }
 if (isEntryPoint() || process.env.PRC_RUN === "1") {
-  main().catch((e) => { console.error("Unexpected error:", e?.message || e); process.exit(2); });
+  main().catch((e) => { console.error("Unexpected error:", safeText(e?.message || e)); process.exit(2); });
 }
