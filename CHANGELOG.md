@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.17] - 2026-07-10
+
+### Changed
+
+- Pressing a button now reads as the cap sinking into its socket. Before, the dark bottom edge collapsed as the button traveled down, which looked like the base rising to meet it. The edge now stays put beneath the sunken cap and a soft shadow falls across the cap's top, so the press feels like a real key going down.
+
 ## [1.7.16] - 2026-07-10
 
 ### Added
@@ -427,6 +433,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.17]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.17
 [1.7.16]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.16
 [1.7.15]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.15
 [1.7.14]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.14
