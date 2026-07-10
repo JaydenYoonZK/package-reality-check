@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.8] - 2026-07-10
+
+### Fixed
+
+- The back-to-top button no longer casts a heavy black smudge in light mode. Its shadow was a single wide dark-theme blur that was never re-tuned for a cream background. Each theme now gets a layered shadow of its own: a tight warm contact shadow plus a soft chartreuse halo in light mode, and a grounded contact shadow with a gentle chartreuse under-glow in dark, with matching hover and pressed variants.
+
 ## [1.7.7] - 2026-07-10
 
 ### Changed
@@ -367,6 +373,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.8]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.8
 [1.7.7]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.7
 [1.7.6]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.6
 [1.7.5]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.5
