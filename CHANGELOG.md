@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.12] - 2026-07-10
+
+### Fixed
+
+- Text no longer flashes and re-settles mid fade when switching between light and dark mode. Text color inherits, so during the old per-element fade every element kept re-easing its parent's already animating color, which made type lag behind the page and snap late. The switch now crossfades the whole page as a single composited snapshot through the View Transitions API, so text and background move together in one smooth pass. The theme toggle is excluded, so its sun and moon morph still plays live. Browsers without view transitions fall back to fading backgrounds, borders and shadows only, with text changing in one clean step.
+
 ## [1.7.11] - 2026-07-10
 
 ### Fixed
@@ -396,6 +402,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.12]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.12
 [1.7.11]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.11
 [1.7.10]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.10
 [1.7.9]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.9
