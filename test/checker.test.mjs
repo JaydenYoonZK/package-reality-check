@@ -222,6 +222,37 @@ import telnetlib
   assert.deepEqual(deps.map(d => d.name).sort(), ["fastapi", "mypkg", "requests"]);
 });
 
+test("Python imports ignore docstrings, strings, and comments", () => {
+  const deps = parsePyImports(`
+"""
+import fake_doc_example
+from another_fake import nope
+"""
+example = "import fake_string"
+escaped = "not an \\\"import fake_escaped\\\" statement"
+# import fake_comment
+import requests
+  `);
+  assert.deepEqual(deps.map(d => d.name), ["requests"]);
+});
+
+test("Python imports handle aliases and map common modules to distributions", () => {
+  const deps = parsePyImports(`
+import numpy as np, pandas as pd
+import yaml, PIL.Image
+from sklearn.model_selection import train_test_split
+from bs4 import BeautifulSoup
+from dotenv import load_dotenv
+from dateutil.parser import parse
+import cv2
+  `);
+  assert.deepEqual(deps.map(d => d.name), [
+    "numpy", "pandas", "PyYAML", "Pillow", "scikit-learn",
+    "beautifulsoup4", "python-dotenv", "python-dateutil", "opencv-python"
+  ]);
+  assert.equal(deps.find(d => d.name === "PyYAML").alias, "yaml");
+});
+
 test("extract() detects input kind", () => {
   assert.equal(extract('{"dependencies":{"express":"*"}}').kind, "package.json");
   assert.equal(extract("requests==2.31.0\nflask>=3").kind, "requirements.txt");

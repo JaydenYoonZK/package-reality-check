@@ -49,7 +49,10 @@ async function existsInOther(name, ecosystem) {
   // an honest answer (Flask_SQLAlchemy would otherwise always miss).
   const lookup = other === "npm" ? name.toLowerCase() : name;
   try {
-    const r = await getJson(registryUrls(lookup, other).api);
+    const urls = registryUrls(lookup, other);
+    // npm's full package document may be many megabytes. Existence in the
+    // other registry needs only the small latest manifest.
+    const r = await getJson(other === "npm" ? urls.latest : urls.api);
     if (r.status === 404 || !r.ok) return false;
     return !(r.json && r.json.error);
   } catch { return false; }
