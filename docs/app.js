@@ -1,5 +1,5 @@
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.23";
-import { fetchFacts } from "./registry.js?v=1.7.23";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.24";
+import { fetchFacts } from "./registry.js?v=1.7.24";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -350,7 +350,10 @@ if (siteNav) {
 
   const canvas = document.createElement("canvas");
   canvas.setAttribute("aria-hidden", "true");
-  canvas.style.cssText = "position:fixed;inset:0;z-index:2100;pointer-events:none;";
+  // width/height 100% is load-bearing: a canvas is a replaced element, so
+  // inset alone does not stretch it and it would lay out at its intrinsic
+  // dpr-scaled size, drawing every spark dpr times too far from the cursor.
+  canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;z-index:2100;pointer-events:none;";
   document.body.appendChild(canvas);
   const ctx = canvas.getContext("2d");
 
