@@ -1,6 +1,6 @@
 {
   "name": "package-reality-check",
-  "version": "1.7.17",
+  "version": "1.7.18",
   "description": "Verify npm and PyPI dependency names before installation. Browser tool, zero-dependency CLI, and GitHub Action.",
   "type": "module",
   "bin": {

@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.18] - 2026-07-11
+
+### Changed
+
+- The 3D key buttons are rebuilt on realistic press physics. The base and its ground shadow are now anchored in place through every state: at rest the cap sits proud on a 5px base, hovering lifts the cap 1px while the base bottom stays put, and pressing sinks the cap 3px into the base with 2px of it still showing beneath the sunken cap, its ground shadow never moving and the shading inside the cap deepening. Before, the whole assembly moved together and the press read as the base rising instead of the cap sinking. Under reduced motion the cap stays still and only the shading responds. README previews are regenerated with the new resting stance.
+
 ## [1.7.17] - 2026-07-10
 
 ### Changed
@@ -433,6 +439,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.18]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.18
 [1.7.17]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.17
 [1.7.16]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.16
 [1.7.15]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.15
