@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.6] - 2026-07-10
+
+### Added
+
+- Tactile depth across the interface. Every button is now built like a physical key: a hard edge shadow beneath it, a soft ambient shadow, and a hairline top bevel. Hovering lifts the key slightly, and pressing travels it down while the edge collapses underneath, a real press you can feel. Primary buttons carry a chartreuse edge and glow, secondary buttons use a warm brand-brown edge in light mode and a deep neutral one in dark, disabled buttons stay flat since a dead control should not look pressable, and the movement is disabled under reduced-motion preferences while the shadow feedback remains. Cards gain a quiet layered elevation per theme.
+- The README preview is regenerated.
+
 ## [1.7.5] - 2026-07-10
 
 ### Fixed
@@ -353,6 +360,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.6]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.6
 [1.7.5]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.5
 [1.7.4]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.4
 [1.7.3]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.3
