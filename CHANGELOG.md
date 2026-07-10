@@ -3,7 +3,7 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## Unreleased
+## [1.6.1] - 2026-07-10
 
 ### Fixed
 
@@ -293,6 +293,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.6.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.1
 [1.6.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.0
 [1.5.17]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.17
 [1.5.16]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.16
