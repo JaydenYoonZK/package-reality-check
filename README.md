@@ -12,7 +12,7 @@ Verify dependency names against npm and PyPI before installation. Package Realit
 </p>
 
 <a href="https://jaydenyoonzk.github.io/package-reality-check/?demo">
-  <img src="docs/assets/preview.png" alt="Package Reality Check showing its dependency input and npm and PyPI verdict workflow" width="100%">
+  <img src="docs/assets/preview.png" alt="Package Reality Check shown in light and dark themes, the hero with its illustration flagging an invented package alongside real ones" width="100%">
 </a>
 
 ```console

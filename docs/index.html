@@ -28,14 +28,14 @@
       document.documentElement.dataset.theme = t;
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=1.7.0">
+  <link rel="stylesheet" href="styles.css?v=1.7.1">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Package Reality Check",
     "applicationCategory": "DeveloperApplication",
-    "softwareVersion": "1.7.0",
+    "softwareVersion": "1.7.1",
     "operatingSystem": "Any (browser-based)",
     "url": "https://jaydenyoonzk.github.io/package-reality-check/",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -46,6 +46,8 @@
 <body>
 
 <div class="bg-scene" aria-hidden="true">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
   <div class="star-layer sl-far">
     <span class="star" style="left:12%;top:18%;animation-delay:-1.4s"></span>
     <span class="star" style="left:38%;top:8%;animation-delay:-3.8s;animation-duration:8.6s"></span>
@@ -70,7 +72,12 @@
   <div class="shape cube3d p1"><div class="dx"><div class="dy"><div class="inner"><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div></div></div></div></div>
   <div class="shape cube3d p2"><div class="dx"><div class="dy"><div class="inner"><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div></div></div></div></div>
   <div class="shape cube3d p3"><div class="dx"><div class="dy"><div class="inner"><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div></div></div></div></div>
+  <div class="shape sph p4"><div class="dx"><div class="dy"><div class="inner"></div></div></div></div>
+  <div class="shape sph p5"><div class="dx"><div class="dy"><div class="inner"></div></div></div></div>
   <div class="shape cube3d p6"><div class="dx"><div class="dy"><div class="inner"><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div></div></div></div></div>
+  <div class="shape sph p7"><div class="dx"><div class="dy"><div class="inner"></div></div></div></div>
+  <div class="shape sph p10"><div class="dx"><div class="dy"><div class="inner"></div></div></div></div>
+  <div class="shape sph p11"><div class="dx"><div class="dy"><div class="inner"></div></div></div></div>
   <div class="shape cube3d p8"><div class="dx"><div class="dy"><div class="inner"><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div></div></div></div></div>
   <div class="shape cube3d p9"><div class="dx"><div class="dy"><div class="inner"><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div><div class="f"></div></div></div></div></div>
 </div>
@@ -94,9 +101,9 @@
 <header id="top">
   <div class="wrap header-grid">
     <div class="header-copy">
-    <p class="eyebrow">Dependency verification before install</p>
-    <h1>Package Reality Check</h1>
-    <p class="lede">Code assistants can recommend plausible package names that do not exist. Check declared dependencies and source imports against npm and PyPI before anything is installed.</p>
+    <p class="eyebrow">Package Reality Check</p>
+    <h1>Did your AI assistant just invent that package?</h1>
+    <p class="lede">Code assistants recommend dependencies with total confidence, and a surprising share of them do not exist. Attackers register those invented names and wait for the next person to run <code style="font-family:var(--mono)">pip install</code>. Paste your dependencies below and check every one against the real registries before anything touches your machine.</p>
     <p class="privacy"><span class="dot"></span> 🔒 Queries go from your browser straight to npm and PyPI. Nothing else sees your code.</p>
     </div>
     <div class="hero-art" aria-hidden="true">
@@ -214,6 +221,6 @@
 </footer>
 
 <button id="to-top" class="to-top" type="button" aria-label="Back to top">&#8593;</button>
-<script type="module" src="app.js?v=1.7.0"></script>
+<script type="module" src="app.js?v=1.7.1"></script>
 </body>
 </html>

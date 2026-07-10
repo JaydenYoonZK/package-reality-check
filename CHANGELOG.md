@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.1] - 2026-07-10
+
+### Fixed
+
+- Restored the suite's visual identity that the previous release had trimmed: the ambient background scene with its orbs and spheres, the original header headline and voice, the hero illustration theming, and the light and dark split-screen README preview. The functional, accessibility, security, and test improvements from that release are all kept.
+
+### Changed
+
+- Light mode's palette is rebuilt around fresh hues instead of darkened earth tones. The accent is now a vivid deep green, success is emerald, the warning orange is clear instead of brown, and the red is brighter. Chip and pill washes are tinted from bright brand colors rather than from the dark text colors, so they read as lively pastels instead of a gray film, and the light-mode decorative constants (page glow, cube wireframes, spheres) moved from olive to brand chartreuse. Every rendered text pair was re-measured at 4.5:1 or better on the live page; dark mode is untouched.
+- The README preview is regenerated to show the new light palette beside dark mode.
+
 ## [1.7.0] - 2026-07-10
 
 ### Added
@@ -314,6 +325,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.1
 [1.7.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.0
 [1.6.1]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.1
 [1.6.0]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.6.0
