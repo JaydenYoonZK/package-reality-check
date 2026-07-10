@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.7] - 2026-07-10
+
+### Changed
+
+- Removed the pulsing status dot from the privacy pill. The animated dot has become one of the most recognizable template cliches on the web, and it was redundant next to the lock icon that already carries the meaning. The pill now leads with the lock alone, with its padding evened out.
+- The README preview is regenerated.
+
 ## [1.7.6] - 2026-07-10
 
 ### Added
@@ -360,6 +367,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.7]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.7
 [1.7.6]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.6
 [1.7.5]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.5
 [1.7.4]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.4
