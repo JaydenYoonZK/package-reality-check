@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.10] - 2026-07-10
+
+### Fixed
+
+- The theme toggle now shows the crescent moon on phones. The previous build morphed the mark by animating SVG geometry (the circle's radius and the mask position) from CSS, which desktop browsers support but iOS Safari does not apply, so dark mode on a phone showed a plain dot instead of a moon. The switch is rebuilt on opacity and transform only, the sun spins away as a true crescent path spins in, which every mobile browser animates. Same look on desktop, now correct everywhere.
+
 ## [1.7.9] - 2026-07-10
 
 ### Changed
@@ -380,6 +386,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.10]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.10
 [1.7.9]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.9
 [1.7.8]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.8
 [1.7.7]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.7
