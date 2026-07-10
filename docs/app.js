@@ -1,5 +1,5 @@
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.20";
-import { fetchFacts } from "./registry.js?v=1.7.20";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.21";
+import { fetchFacts } from "./registry.js?v=1.7.21";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
