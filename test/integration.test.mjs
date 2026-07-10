@@ -53,6 +53,18 @@ test("exit 0 when a manifest exists but declares no dependencies", async () => {
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test("exit 0 and report dependencies that were explicitly ignored", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "prc-int-"));
+  try {
+    writeFileSync(join(dir, "package.json"), JSON.stringify({ dependencies: { "@company/private": "1.0.0" } }));
+    const r = await run([dir, "--ignore", "npm:@company/private", "--json"]);
+    assert.equal(r.code, 0);
+    const parsed = JSON.parse(r.stdout);
+    assert.deepEqual(parsed.ignored, [{ name: "@company/private", ecosystem: "npm" }]);
+    assert.equal(parsed.packages, 0);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test("exit 2 when the only manifest cannot be parsed", async () => {
   const dir = mkdtempSync(join(tmpdir(), "prc-int-"));
   try {

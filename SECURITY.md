@@ -4,14 +4,14 @@
 
 If you find a security issue in Package Reality Check, please report it privately rather than opening a public issue.
 
-Use GitHub's private vulnerability reporting on this repository: choose "Report a vulnerability" under the Security tab.
+Use [GitHub's private vulnerability reporting form](https://github.com/JaydenYoonZK/package-reality-check/security/advisories/new).
 
-You can expect an acknowledgment within 72 hours. Please include steps to reproduce and, if you have one, a suggested fix.
+Include steps to reproduce, the affected code path, expected impact, and any suggested remediation.
 
 ## Scope
 
-The interesting attack surface of this tool is untrusted input: manifests and source files it parses, and package names it prints or places into registry URLs. Reports about parsing hangs (ReDoS), terminal escape injection, URL or path injection through crafted names, and anything that makes the tool report a false "all clear" are all very much in scope.
+The primary attack surface is untrusted input: manifests and source files, terminal output, and package names placed into registry URLs. Parsing hangs, terminal injection, URL or path injection, and false clean results are in scope.
 
 ## Supported versions
 
-Only the latest release is supported. The tool has zero runtime dependencies by design; if you find that no longer true, that is also a bug worth reporting.
+Security fixes are assessed against the latest release. Older versions may not receive patches. The CLI and Action have no third-party runtime dependencies.
