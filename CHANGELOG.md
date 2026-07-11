@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.38] - 2026-07-11
+
+### Changed
+
+- The 404 page is now a full member of the site. It carries the brand navigation bar with the working theme toggle and crossfade, the ambient three dimensional background scene with its parallax, the cursor dust, and a new animated illustration of a browser window missing its page, complete with a searching magnifying glass. Navigation links from the 404 lead back into the tool's sections.
+
 ## [1.7.37] - 2026-07-11
 
 ### Added
@@ -557,6 +563,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.38]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.38
 [1.7.37]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.37
 [1.7.36]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.36
 [1.7.35]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.35
