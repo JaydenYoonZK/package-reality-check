@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.35] - 2026-07-11
+
+### Added
+
+- A skip to main content link for keyboard and screen reader users. It waits off screen as the page's first focusable element and drops in as a chartreuse key when focused, jumping past the navigation straight to the tool. The slide respects reduced motion preferences.
+
 ## [1.7.34] - 2026-07-11
 
 ### Fixed
@@ -539,6 +545,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.35]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.35
 [1.7.34]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.34
 [1.7.33]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.33
 [1.7.32]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.32
