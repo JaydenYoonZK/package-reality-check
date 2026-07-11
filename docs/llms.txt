@@ -1,0 +1,16 @@
+# Package Reality Check
+
+> Check that dependencies actually exist and are legit on npm and PyPI. Catches AI-hallucinated packages and typosquats before install.
+
+## Tool
+
+- [Package Reality Check](https://jaydenyoonzk.github.io/package-reality-check/): the tool itself, a static page that runs entirely in the browser with no accounts and no data collection
+
+## Documentation
+
+- [README](https://github.com/JaydenYoonZK/package-reality-check#readme): what the tool does, how it works, and its engineering notes
+- [Changelog](https://github.com/JaydenYoonZK/package-reality-check/blob/main/CHANGELOG.md): dated release history
+
+## Source
+
+- [Repository](https://github.com/JaydenYoonZK/package-reality-check): MIT licensed source code
