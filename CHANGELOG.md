@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.27] - 2026-07-11
+
+### Changed
+
+- The scrollbar now carries the brand. The thumb is a glowing chartreuse key-cap pill with the same top-lit gradient the buttons use, riding a faint chartreuse center rail. It brightens and thickens under the pointer and charges up with a hotter gradient and stronger glow while being dragged. Firefox shows a solid chartreuse thumb through the standard scrollbar properties.
+
 ## [1.7.26] - 2026-07-11
 
 ### Added
@@ -490,6 +496,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.27]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.27
 [1.7.26]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.26
 [1.7.25]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.25
 [1.7.24]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.24
