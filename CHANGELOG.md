@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.31] - 2026-07-11
+
+### Changed
+
+- The film grain is a touch more present in both themes, still well below its original strength, keeping gradients dithered while the texture stays a quiet detail. README previews regenerated.
+
 ## [1.7.30] - 2026-07-11
 
 ### Changed
@@ -514,6 +520,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.31]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.31
 [1.7.30]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.30
 [1.7.29]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.29
 [1.7.28]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.28
