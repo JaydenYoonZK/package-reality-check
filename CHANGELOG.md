@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.25] - 2026-07-11
+
+### Added
+
+- Selected text now wears the brand. Highlighting any text shows the same chartreuse-with-dark-ink pairing the primary buttons use, identical in both themes, replacing the browser's default blue.
+
 ## [1.7.24] - 2026-07-11
 
 ### Fixed
@@ -478,6 +484,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.25]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.25
 [1.7.24]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.24
 [1.7.23]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.23
 [1.7.22]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.22
