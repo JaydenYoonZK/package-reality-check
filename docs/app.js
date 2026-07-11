@@ -1,5 +1,5 @@
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.33";
-import { fetchFacts } from "./registry.js?v=1.7.33";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.34";
+import { fetchFacts } from "./registry.js?v=1.7.34";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -65,7 +65,7 @@ function rowHtml(dep, v, urls) {
   const title = v?.title ? `<strong>${esc(v.title)}</strong><br>` : "";
   const detail = v ? `${title}<span class="detail">${esc(v.detail || "")}</span>` : `<span class="detail">checking registry...</span>`;
   const link = v?.level && v.level !== "phantom" && v.level !== "checking"
-    ? ` <a href="${esc(urls.page)}" rel="noopener noreferrer" target="_blank">view</a>` : "";
+    ? ` <a class="doclink" href="${esc(urls.page)}" rel="noopener noreferrer" target="_blank">view</a>` : "";
   return `<td class="pkg">${esc(dep.name)}<div class="eco">${esc(dep.ecosystem)}${dep.source ? " · " + esc(dep.source) : ""}</div></td>
     <td>${badge}</td><td>${detail}${link}</td>`;
 }
