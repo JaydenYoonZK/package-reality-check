@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.40] - 2026-07-12
+
+### Fixed
+
+- The 404 page now carries the same Built by Jayden Yoon ZK footer as every other page.
+- Short pages no longer show a hard-edged second copy of the page glow near the bottom. The body background propagates to the canvas, which tiles the glow image below a short page; the glow is now painted exactly once.
+
 ## [1.7.39] - 2026-07-12
 
 ### Added
@@ -569,6 +576,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.40]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.40
 [1.7.39]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.39
 [1.7.38]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.38
 [1.7.37]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.37
