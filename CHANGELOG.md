@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.29] - 2026-07-11
+
+### Added
+
+- The resize corner of text boxes shows a hand-drawn affordance again: two diagonal grip lines in brand green floating on a transparent square, so people can tell the box expands while the rounded corner stays clean. Light mode uses the deeper green for contrast on cream.
+
 ## [1.7.28] - 2026-07-11
 
 ### Fixed
@@ -502,6 +508,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.29]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.29
 [1.7.28]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.28
 [1.7.27]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.27
 [1.7.26]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.26
