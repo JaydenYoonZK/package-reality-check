@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.26] - 2026-07-11
+
+### Added
+
+- Custom scrollbars, on the page and inside any scrollable box such as the paste areas and code snippets. A slim rounded pill floats on a fully transparent track in each theme's surface tone, thickens and brightens under the pointer, and turns chartreuse while being dragged, the same accent the buttons use. WebKit browsers get the full treatment and Firefox gets the matching thin themed scrollbar through the standard properties.
+
 ## [1.7.25] - 2026-07-11
 
 ### Added
@@ -484,6 +490,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.26]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.26
 [1.7.25]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.25
 [1.7.24]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.24
 [1.7.23]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.23
