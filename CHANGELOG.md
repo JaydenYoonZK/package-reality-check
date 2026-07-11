@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.37] - 2026-07-11
+
+### Added
+
+- A branded 404 page. Broken or mistyped links now land on a page in the full design, with a note written in the tool's own voice, a chartreuse key back to the tool, and a grid linking the six sibling tools. GitHub Pages serves it automatically for any missing path, and search engines are told not to index it.
+
 ## [1.7.36] - 2026-07-11
 
 ### Added
@@ -551,6 +557,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.37]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.37
 [1.7.36]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.36
 [1.7.35]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.35
 [1.7.34]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.34
