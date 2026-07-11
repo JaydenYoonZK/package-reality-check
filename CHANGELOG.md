@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.39] - 2026-07-12
+
+### Added
+
+- The page now loads offline. A small service worker caches the shell on the first visit, answers repeat visits from cache while refreshing in the background, and drops old caches on every release. Live lookups still need a connection and pass through the worker untouched.
+
 ## [1.7.38] - 2026-07-11
 
 ### Changed
@@ -563,6 +569,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.39]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.39
 [1.7.38]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.38
 [1.7.37]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.37
 [1.7.36]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.36
