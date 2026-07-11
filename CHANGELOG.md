@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.33] - 2026-07-11
+
+### Fixed
+
+- Tables are readable on phones. The old narrow-screen treatment turned tables into sideways-scrolling boxes with no hint that more columns existed, so status pills were chopped mid-word and explanation columns sat invisible off-screen. Rows now restack as cards on narrow screens: names and pills flow on one line, the explanation wraps at full width beneath them, decorative header rows step aside, and nothing scrolls sideways.
+
 ## [1.7.32] - 2026-07-11
 
 ### Changed
@@ -526,6 +532,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.33]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.33
 [1.7.32]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.32
 [1.7.31]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.31
 [1.7.30]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.30
