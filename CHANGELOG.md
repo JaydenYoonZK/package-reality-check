@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.44] - 2026-07-12
+
+### Changed
+
+- The footer is now centered, and the copyright line links a bold Jayden Yoon ZK to https://www.JaydenYoonZK.com.
+
 ## [1.7.43] - 2026-07-12
 
 ### Added
@@ -594,6 +600,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.44]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.44
 [1.7.43]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.43
 [1.7.42]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.42
 [1.7.41]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.41
