@@ -30,14 +30,14 @@
       document.documentElement.dataset.theme = t;
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=1.7.46">
+  <link rel="stylesheet" href="styles.css?v=1.7.47">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Package Reality Check",
     "applicationCategory": "DeveloperApplication",
-    "softwareVersion": "1.7.46",
+    "softwareVersion": "1.7.47",
     "operatingSystem": "Any (browser-based)",
     "url": "https://jaydenyoonzk.github.io/package-reality-check/",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -114,6 +114,7 @@
     <a href="#checks">Checks</a>
     <a href="#protect">Protection</a>
     <a href="#faq">FAQ</a>
+      <a href="#why-built">Story</a>
     </div>
   </div>
 </nav>
@@ -188,7 +189,7 @@
   </div>
 
   <div class="prose">
-    <h2 id="hallucination">What package hallucination is</h2>
+    <h2 id="hallucination">👻 What package hallucination is</h2>
     <div class="why-split">
       <div>
         <p>Large language models complete patterns. When a task calls for a package that handles JWT authentication for FastAPI, a model may produce a plausible name whether or not anyone published it. A <a href="https://www.usenix.org/system/files/usenixsecurity25-spracklen.pdf" rel="noopener noreferrer">USENIX Security study of 576,000 generated code samples</a> reported average hallucination rates of at least 5.2% for commercial models and 21.7% for open-source models, including 205,474 unique invented package names.</p>
@@ -221,7 +222,7 @@
 
     
 
-    <h2 id="verdicts">What the verdicts mean</h2>
+    <h2 id="verdicts">🚦 What the verdicts mean</h2>
     <table>
       <tr><th>Verdict</th><th>Meaning</th></tr>
       <tr><td><span class="verdict phantom">PHANTOM</span></td><td>The package is not in the registry. If a tool suggested it, the name was likely invented. Never pre-create internal names publicly; a squatter can claim them.</td></tr>
@@ -230,7 +231,7 @@
       <tr><td><span class="verdict ok">OK</span></td><td>Established package. This says nothing about its quality, only that it is real and not an obvious impostor.</td></tr>
     </table>
 
-    <h2 id="checks">What this tool checks</h2>
+    <h2 id="checks">🕵️ What this tool checks</h2>
     <ul class="kept-columns">
       <li>Every dependency in a pasted <code>package.json</code> (all dependency fields), <code>requirements.txt</code> (specifiers, extras, and markers are handled), <code>pyproject.toml</code> (PEP 621 and Poetry), or source code with <code>import</code> and <code>require</code> statements.</li>
       <li>Node built-ins and the Python standard library are recognized and skipped, including modules removed in recent Python versions such as <code>telnetlib</code>.</li>
@@ -238,7 +239,7 @@
       <li>Edit distance against several hundred of the most-installed packages in each ecosystem, to catch <code>reqeusts</code> and <code>lodahs</code> before they catch you.</li>
     </ul>
 
-    <h2 id="protect">How to protect yourself beyond this page</h2>
+    <h2 id="protect">🛡️ How to protect yourself beyond this page</h2>
     <ul class="kept-columns">
       <li>Treat dependency suggestions from AI tools as unverified input, the same way you treat their code.</li>
       <li>Run the <a href="https://github.com/JaydenYoonZK/package-reality-check#github-action" rel="noopener noreferrer">GitHub Action</a> before dependency installation in pull requests.</li>
@@ -247,7 +248,7 @@
       <li>Internal package names belong in a private registry with a scoped namespace, so nobody can shadow them publicly.</li>
     </ul>
 
-    <h2 id="faq">Questions people ask</h2>
+    <h2 id="faq">💬 Frequently asked questions</h2>
     <div class="faq">
       <div class="faq-item">
         <h3 class="faq-q"><button type="button" id="faq-b1" aria-expanded="false" aria-controls="faq-a1"><span>Does my code get uploaded?</span><span class="faq-icon" aria-hidden="true"></span></button></h3>
@@ -275,6 +276,37 @@
       </div>
     </div>
 
+    <h2 id="why-built">🌱 Why I built this</h2>
+    <div class="why-split story-split">
+      <div>
+        <p>A code suggestion once handed me a package name that did not exist, one letter away from one that did. Registering that name would take a squatter a few minutes. Checking dependencies by hand got old fast, so I built the check I wanted to run before every install.</p>
+      </div>
+      <svg class="why-art art-sprout" viewBox="79 62 180 198" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <animateTransform attributeName="transform" type="rotate" values="-1.6 170 196; 1.6 170 196; -1.6 170 196" dur="6s" repeatCount="indefinite"/>
+          <path d="M170 190 C169 168 172 150 170 128" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M170 158 C150 154 138 140 136 122 C156 124 168 138 170 158 Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M170 138 C190 132 200 118 202 100 C182 102 172 116 170 138 Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>
+        </g>
+        <path d="M128 190 L212 190 L202 244 C201 250 196 254 190 254 L150 254 C144 254 139 250 138 244 Z" fill="var(--panel)" stroke="var(--line-strong)" stroke-width="2"/>
+        <rect x="122" y="184" width="96" height="14" rx="7" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-width="2"/>
+        <g fill="var(--accent)">
+          <path d="M96 96 L99 104 L107 107 L99 110 L96 118 L93 110 L85 107 L93 104 Z">
+            <animate attributeName="opacity" values="0.2;1;0.2" dur="3.6s" repeatCount="indefinite"/>
+          </path>
+          <path d="M244 70 L246.4 76.4 L252.8 79 L246.4 81.6 L244 88 L241.6 81.6 L235.2 79 L241.6 76.4 Z">
+            <animate attributeName="opacity" values="1;0.15;1" dur="4.4s" repeatCount="indefinite"/>
+          </path>
+          <circle cx="222" cy="150" r="3">
+            <animate attributeName="opacity" values="0.25;0.9;0.25" dur="2.9s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="118" cy="146" r="3">
+            <animate attributeName="opacity" values="0.9;0.2;0.9" dur="3.7s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+      </svg>
+    </div>
+
     </div>
 </main>
 
@@ -292,6 +324,6 @@
 </footer>
 
 <button id="to-top" class="to-top" type="button" aria-label="Back to top">&#8593;</button>
-<script type="module" src="app.js?v=1.7.46"></script>
+<script type="module" src="app.js?v=1.7.47"></script>
 </body>
 </html>

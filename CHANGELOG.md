@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.47] - 2026-07-12
+
+### Added
+
+- A "Why I built this" story closes the page, paired with the suite's sprout scene and linked from the navigation, matching the sibling tools.
+
+### Changed
+
+- The FAQ heading reads "Frequently asked questions" now.
+- Every section heading carries an emoji now, matching the rest of the suite.
+
 ## [1.7.46] - 2026-07-12
 
 ### Added
@@ -617,6 +628,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.47]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.47
 [1.7.46]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.46
 [1.7.45]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.45
 [1.7.44]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.44
