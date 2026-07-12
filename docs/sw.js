@@ -4,7 +4,7 @@
    requests pass through untouched so live lookups stay live. The cache name
    carries the release version and old caches are dropped on activate. */
 
-const VERSION = "?v=1.7.50";
+const VERSION = "?v=1.7.51";
 const CACHE = "package-reality-check-" + VERSION;
 const SHELL = [
   "./",
