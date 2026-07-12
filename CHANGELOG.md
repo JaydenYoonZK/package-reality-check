@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.46] - 2026-07-12
+
+### Added
+
+- The FAQ is a set of full-width accordions now, each question carrying a plus that turns into a close mark as the answer unfolds, with the state exposed to keyboards and screen readers.
+- The page carries a real-and-phantom package scene beside the hallucination explainer and two-column reference lists, so sections close at the full width instead of trailing off empty on the right.
+
+### Changed
+
+- Result chips grow to close each row, the seam between the tool and the prose is tighter, and loose paragraphs run the full section width.
+
 ## [1.7.45] - 2026-07-12
 
 ### Fixed
@@ -606,6 +617,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.46]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.46
 [1.7.45]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.45
 [1.7.44]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.44
 [1.7.43]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.43

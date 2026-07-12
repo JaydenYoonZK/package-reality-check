@@ -1,6 +1,6 @@
 /*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.45";
-import { fetchFacts } from "./registry.js?v=1.7.45";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.46";
+import { fetchFacts } from "./registry.js?v=1.7.46";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -490,3 +490,13 @@ console.info(
 // The footer's copyright year keeps itself current.
 const yearEl = document.getElementById("copyright-year");
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+// FAQ accordions: the button carries the disclosure state, so keyboard
+// and screen reader users get the expand and collapse for free.
+document.querySelectorAll(".faq-q button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const item = btn.closest(".faq-item");
+    const open = item.classList.toggle("open");
+    btn.setAttribute("aria-expanded", String(open));
+  });
+});
