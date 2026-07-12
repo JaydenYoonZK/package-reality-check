@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.49] - 2026-07-12
+
+### Added
+
+- The navigation bar lifts with a soft, tight shadow once the page scrolls beneath it, and sits flush again at the top. Each theme carries its own tint.
+
 ## [1.7.48] - 2026-07-12
 
 ### Added
@@ -634,6 +640,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.49]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.49
 [1.7.48]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.48
 [1.7.47]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.47
 [1.7.46]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.46

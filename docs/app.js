@@ -1,6 +1,6 @@
 /*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.48";
-import { fetchFacts } from "./registry.js?v=1.7.48";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.49";
+import { fetchFacts } from "./registry.js?v=1.7.49";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -500,3 +500,11 @@ document.querySelectorAll(".faq-q button").forEach((btn) => {
     btn.setAttribute("aria-expanded", String(open));
   });
 });
+
+// The nav lifts with a soft shadow once the page scrolls beneath it.
+const navBar = document.querySelector(".site-nav");
+if (navBar) {
+  const syncNavShadow = () => navBar.classList.toggle("scrolled", scrollY > 8);
+  addEventListener("scroll", syncNavShadow, { passive: true });
+  syncNavShadow();
+}
