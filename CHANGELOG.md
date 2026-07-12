@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.53] - 2026-07-12
+
+### Fixed
+
+- The strip above the navigation bar is solid now. iOS skips the frosted blur in the overscroll zone, so the translucent skin let content ghost through it; the bleed wears the opaque page background, which reads identically to the bar over an empty page in both themes.
+
 ## [1.7.52] - 2026-07-12
 
 ### Fixed
@@ -658,6 +664,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.53]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.53
 [1.7.52]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.52
 [1.7.51]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.51
 [1.7.50]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.50
