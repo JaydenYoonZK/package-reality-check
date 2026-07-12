@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.45] - 2026-07-12
+
+### Fixed
+
+- The privacy pill's lock now stays vertically centered when the text wraps to a second line.
+
 ## [1.7.44] - 2026-07-12
 
 ### Changed
@@ -600,6 +606,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.45]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.45
 [1.7.44]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.44
 [1.7.43]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.43
 [1.7.42]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.42

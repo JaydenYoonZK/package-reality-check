@@ -1,6 +1,6 @@
 /*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.44";
-import { fetchFacts } from "./registry.js?v=1.7.44";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.45";
+import { fetchFacts } from "./registry.js?v=1.7.45";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
