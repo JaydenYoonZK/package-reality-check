@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.41] - 2026-07-12
+
+### Fixed
+
+- The 404 page's key and tool cards no longer pick up the prose link underline on hover, focus, or press.
+
 ## [1.7.40] - 2026-07-12
 
 ### Fixed
@@ -576,6 +582,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.41]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.41
 [1.7.40]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.40
 [1.7.39]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.39
 [1.7.38]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.38
