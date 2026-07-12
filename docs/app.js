@@ -1,5 +1,6 @@
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.41";
-import { fetchFacts } from "./registry.js?v=1.7.41";
+/*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.42";
+import { fetchFacts } from "./registry.js?v=1.7.42";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -479,3 +480,9 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").catch(() => { /* offline support is optional */ });
   });
 }
+
+console.info(
+  "%cBuilt by Jayden Yoon ZK%c https://github.com/JaydenYoonZK",
+  "background:#abcf37;color:#101400;font-weight:700;padding:2px 8px;border-radius:999px",
+  "color:inherit"
+);

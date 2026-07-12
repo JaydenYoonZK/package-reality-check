@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.42] - 2026-07-12
+
+### Added
+
+- Source attribution in the shipped files. Every stylesheet and script now opens with a license banner naming Jayden Yoon ZK, each page carries an author meta tag and an HTML notice, and the browser console prints a small signature with a link back to the source.
+
 ## [1.7.41] - 2026-07-12
 
 ### Fixed
@@ -582,6 +588,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.42]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.42
 [1.7.41]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.41
 [1.7.40]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.40
 [1.7.39]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.39

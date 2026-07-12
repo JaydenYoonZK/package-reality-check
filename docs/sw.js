@@ -1,9 +1,10 @@
+/*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
 /* Offline support. The shell is precached at install, same-origin requests
    are answered from cache and refreshed in the background, and cross-origin
    requests pass through untouched so live lookups stay live. The cache name
    carries the release version and old caches are dropped on activate. */
 
-const VERSION = "?v=1.7.41";
+const VERSION = "?v=1.7.42";
 const CACHE = "package-reality-check-" + VERSION;
 const SHELL = [
   "./",

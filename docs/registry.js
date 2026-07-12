@@ -1,3 +1,4 @@
+/*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
 /**
  * Registry lookups for Package Reality Check.
  *
