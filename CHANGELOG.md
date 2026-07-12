@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.50] - 2026-07-12
+
+### Changed
+
+- The navigation bar's soft shadow shows at all times now instead of appearing on scroll.
+
 ## [1.7.49] - 2026-07-12
 
 ### Added
@@ -640,6 +646,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.50]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.50
 [1.7.49]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.49
 [1.7.48]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.48
 [1.7.47]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.47
