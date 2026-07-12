@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.43] - 2026-07-12
+
+### Added
+
+- Every page, including the 404, now closes with a quiet copyright line in the footer: Copyright © Jayden Yoon ZK with the current year, All Rights Reserved. The year keeps itself current.
+
 ## [1.7.42] - 2026-07-12
 
 ### Added
@@ -588,6 +594,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.43]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.43
 [1.7.42]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.42
 [1.7.41]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.41
 [1.7.40]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.40

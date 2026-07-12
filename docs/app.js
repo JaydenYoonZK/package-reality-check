@@ -1,6 +1,6 @@
 /*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.42";
-import { fetchFacts } from "./registry.js?v=1.7.42";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.43";
+import { fetchFacts } from "./registry.js?v=1.7.43";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -486,3 +486,7 @@ console.info(
   "background:#abcf37;color:#101400;font-weight:700;padding:2px 8px;border-radius:999px",
   "color:inherit"
 );
+
+// The footer's copyright year keeps itself current.
+const yearEl = document.getElementById("copyright-year");
+if (yearEl) yearEl.textContent = String(new Date().getFullYear());
