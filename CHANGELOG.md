@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.52] - 2026-07-12
+
+### Fixed
+
+- The navigation bar now bleeds its own skin above the viewport, so iOS elastic scrolling, the collapsing Safari chrome, and desktop rubber-banding show navigation instead of a bare transparent strip. Works in both themes.
+
 ## [1.7.51] - 2026-07-12
 
 ### Added
@@ -652,6 +658,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.52]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.52
 [1.7.51]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.51
 [1.7.50]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.50
 [1.7.49]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.49
