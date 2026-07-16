@@ -214,3 +214,18 @@ test("fetchFacts pypi: a 404 is a phantom, and reports foundIn when the name is 
   assert.equal(pure.exists, false);
   assert.equal(pure.foundIn, null);
 });
+
+test("a 200 response with an unreadable body reports 'unreadable', not 'answered 200'", async () => {
+  // A CDN error page or truncated response: HTTP 200 but the body fails to parse.
+  globalThis.fetch = async (url) => ({
+    status: 200,
+    ok: true,
+    json: async () => { throw new SyntaxError("Unexpected token < in JSON"); }
+  });
+  const npm = await fetchFacts({ name: "some-npm-name", ecosystem: "npm" });
+  const pypi = await fetchFacts({ name: "some-pypi-name", ecosystem: "pypi" });
+  for (const f of [npm, pypi]) {
+    assert.equal(f.error, "registry returned an unreadable response");
+    assert.doesNotMatch(f.error, /answered 200/);
+  }
+});

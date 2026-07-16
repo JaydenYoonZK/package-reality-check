@@ -84,7 +84,7 @@ WHAT IT CHECKS
 EXIT CODES
   0  clean (nothing at or above --fail-on)
   1  findings at or above --fail-on
-  2  usage error or no dependencies found`;
+  2  usage error, no manifest found, or nothing could be verified`;
 
 /* ------------------------------- color ------------------------------- */
 
@@ -169,7 +169,21 @@ function isRequirementsFile(name) {
   return /^(requirements[\w.-]*\.txt|dev-requirements\.txt|constraints\.txt)$/i.test(name);
 }
 
-const readText = (f) => readFileSync(f, "utf8").replace(/^﻿/, ""); // strip UTF-8 BOM
+// Read a manifest as text, honoring a UTF-16 byte-order mark. PowerShell's
+// `pip freeze > requirements.txt` writes UTF-16LE by default; decoding that as
+// UTF-8 would yield garbage that parses to zero dependencies and a false clean.
+function readText(f) {
+  const buf = readFileSync(f);
+  if (buf.length >= 2 && buf[0] === 0xFF && buf[1] === 0xFE) {
+    return buf.toString("utf16le").replace(/^﻿/, "");
+  }
+  if (buf.length >= 2 && buf[0] === 0xFE && buf[1] === 0xFF) {
+    const swapped = Buffer.from(buf.subarray(buf.length % 2 === 0 ? 0 : 1));
+    swapped.swap16(); // Node decodes only little-endian UTF-16
+    return swapped.toString("utf16le").replace(/^﻿/, "");
+  }
+  return buf.toString("utf8").replace(/^﻿/, "");
+}
 
 export function collectDeps(root, includeCode) {
   const deps = [];
@@ -296,7 +310,7 @@ export function exitCodeForResults(results, failOn) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
-  if (opts.help) { printBanner(`package-reality-check v${VERSION}`); console.log(HELP); process.exit(0); }
+  if (opts.help) { printBanner(`package-reality-check v${VERSION}`, { color: opts.color }); console.log(HELP); process.exit(0); }
   if (opts.version) { console.log(VERSION); process.exit(0); }
   if (opts.badFlag) { console.error(`Unknown option: ${safeText(opts.badFlag)}\nRun with --help.`); process.exit(2); }
   if (opts.extraArg) { console.error(`Unexpected argument: ${safeText(opts.extraArg)}. Pass a single project directory.`); process.exit(2); }
@@ -314,7 +328,7 @@ async function main() {
   try { if (!statSync(root).isDirectory()) throw 0; }
   catch { console.error(`Not a directory: ${safeText(opts.path)}`); process.exit(2); }
 
-  if (!opts.json && !opts.quiet) printBanner(`package-reality-check v${VERSION}`);
+  if (!opts.json && !opts.quiet) printBanner(`package-reality-check v${VERSION}`, { color: opts.color });
   const colorEnabled = opts.color !== null ? opts.color : (process.stdout.isTTY && !process.env.NO_COLOR);
   const c = makeColor(colorEnabled);
 
@@ -374,25 +388,42 @@ async function main() {
   });
   if (!opts.json && process.stderr.isTTY) process.stderr.write("                                   \r");
 
-  if (opts.json) {
-    console.log(JSON.stringify({
-      packages: results.length,
-      unreadable: unreadable.length ? unreadable.map(safeText) : undefined,
-      ignored: ignored.length ? ignored.map(dep => ({ name: safeText(dep.name), ecosystem: dep.ecosystem })) : undefined,
-      notChecked: overflow > 0 ? overflow : undefined,
-      results: results.map(r => ({
-        name: safeText(r.name), ecosystem: r.ecosystem, level: r.level,
-        title: r.title || null, detail: r.detail || null, source: r.source || null,
-        file: r.file ? safeText(r.file) : null
-      }))
-    }, null, 2));
-  } else {
-    console.log(render(results, opts, c));
-  }
+  const payload = opts.json
+    ? JSON.stringify({
+        packages: results.length,
+        unreadable: unreadable.length ? unreadable.map(safeText) : undefined,
+        ignored: ignored.length ? ignored.map(dep => ({ name: safeText(dep.name), ecosystem: dep.ecosystem })) : undefined,
+        notChecked: overflow > 0 ? overflow : undefined,
+        results: results.map(r => ({
+          name: safeText(r.name), ecosystem: r.ecosystem, level: r.level,
+          title: r.title || null, detail: r.detail || null, source: r.source || null,
+          file: r.file ? safeText(r.file) : null
+        }))
+      }, null, 2)
+    : render(results, opts, c);
 
   // If nothing could be checked (every lookup errored), we verified nothing.
   // Do not report success: exit 2 so CI treats it as an incomplete run.
-  process.exit(exitCodeForResults(results, opts.failOn));
+  const code = exitCodeForResults(results, opts.failOn);
+  // Write, then exit only once stdout has drained. On a pipe Node's stdout is
+  // async, and calling process.exit() straight away would cut a large report
+  // off at the OS pipe buffer (64 KB), corrupting --json for big projects.
+  writeAndExit(payload + "\n", code);
+}
+
+// Write to stdout and exit after the write is fully flushed, so piped output
+// is never truncated. If stdout is already closed (a downstream `head`), fall
+// back to exiting immediately.
+function writeAndExit(text, code) {
+  try {
+    const flushed = process.stdout.write(text);
+    if (flushed) process.exit(code);
+    else process.stdout.once("drain", () => process.exit(code));
+    // Safety net: never hang if the drain event does not arrive.
+    process.stdout.once("error", () => process.exit(code));
+  } catch {
+    process.exit(code);
+  }
 }
 
 // Run main() only when invoked as a command, not when imported by tests.

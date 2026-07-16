@@ -3,6 +3,30 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.58] - 2026-07-16
+
+A deep quality pass from an adversarial pre-launch review: correctness of the detection verdicts, the CLI, the page, and the docs.
+
+### Fixed
+
+- Poetry git, path, url, and file dependencies are no longer reported as phantom ("an AI likely invented it"). An inline table pointing at a non-registry source is skipped, the same way the npm parser already skips git and file specs, so a normal Poetry monorepo or fork no longer lights up as hallucinated.
+- PEP 508 direct references in requirements.txt (`name @ url`) are recognized as URL, VCS, or path sources and skipped, instead of being looked up and branded as invented packages.
+- Piped output is no longer truncated. The tool exited before the pipe drained, so `--json | jq` and any report over about 64 KB were cut off mid-stream; output now flushes fully before exit.
+- A UTF-16 requirements.txt (what PowerShell's `pip freeze` writes) is decoded by its byte-order mark instead of read as empty, so a real file no longer reports a false clean pass.
+- `--no-color` now also strips the brand banner's color, matching its documented promise.
+- The 404 page works at any URL depth: its stylesheet, script, and links are project-absolute, so a missing path two or more segments deep is styled and navigable rather than raw HTML with a dead back button.
+- `prefers-reduced-motion` now pauses the page's SVG animations, which CSS rules cannot stop.
+- Theme reading and writing survive blocked browser storage (private modes, strict settings) instead of throwing.
+- The back-to-top button leaves the keyboard tab order while it is hidden.
+- A registry response that returns HTTP 200 with an unreadable body now reports "an unreadable response" rather than the contradictory "registry answered 200".
+
+### Changed
+
+- The import-name map covers pyOpenSSL and pywin32 (and PyJWT, pycryptodome), so `--include-code` no longer false-phantoms those common packages.
+- A `theme-color` meta follows the active theme so mobile browser chrome matches the page.
+- The `--help` exit-code note and the site's "non-zero" wording match the README exactly.
+- `funding` field in package.json, and the GitHub repo description and topics now name the Action.
+
 ## [1.7.57] - 2026-07-16
 
 ### Added
@@ -688,6 +712,9 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.58]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.58
+[1.7.57]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.57
+[1.7.56]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.56
 [1.7.55]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.55
 [1.7.54]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.54
 [1.7.53]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.53
@@ -758,6 +785,7 @@ First stable release.
 [1.5.8]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.8
 [1.5.7]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.7
 [1.5.6]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.6
+[1.5.5]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.5
 [1.5.4]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.4
 [1.5.3]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.3
 [1.5.2]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.5.2

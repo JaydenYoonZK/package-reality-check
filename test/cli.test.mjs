@@ -188,3 +188,39 @@ test("render quiet mode omits OK rows but keeps the summary", () => {
   assert.ok(!/express/.test(out), "OK row hidden in quiet mode");
   assert.match(out, /bad/);
 });
+
+test("collectDeps decodes a UTF-16LE (BOM) requirements.txt instead of reading it as empty", () => {
+  const dir = mkdtempSync(join(tmpdir(), "prc-u16-"));
+  try {
+    // UTF-16LE with BOM, as PowerShell's `pip freeze > requirements.txt` writes.
+    const bytes = Buffer.from("﻿" + "requests==2.31\nflask\n", "utf16le");
+    writeFileSync(join(dir, "requirements.txt"), bytes);
+    const { deps } = collectDeps(dir, false);
+    assert.deepEqual(deps.map(d => d.name).sort(), ["flask", "requests"]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("collectDeps does not phantom a Poetry git/path dependency", () => {
+  const dir = mkdtempSync(join(tmpdir(), "prc-poetry-"));
+  try {
+    writeFileSync(join(dir, "pyproject.toml"), [
+      "[tool.poetry.dependencies]",
+      'python = "^3.11"',
+      'requests = "^2.31"',
+      'forked = { git = "https://github.com/x/forked.git" }',
+      'internal = { path = "../internal" }'
+    ].join("\n"));
+    const { deps } = collectDeps(dir, false);
+    assert.deepEqual(deps.map(d => d.name).sort(), ["requests"]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("parseArgs reads --no-color and --color into the color choice", () => {
+  assert.equal(parseArgs([]).color, null);
+  assert.equal(parseArgs(["--no-color"]).color, false);
+  assert.equal(parseArgs(["--color"]).color, true);
+});

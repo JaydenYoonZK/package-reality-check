@@ -41,6 +41,14 @@ async function getJson(url, { timeoutMs = 20000, retries = 3 } = {}) {
   throw lastErr || new Error("request failed");
 }
 
+// A response we could not use. A 2xx status with an unreadable body (a CDN
+// error page, a truncated response) is reported as unreadable rather than
+// "registry answered 200", which reads as a contradiction.
+function describeFetchError(res) {
+  if (res.ok && !res.json) return "registry returned an unreadable response";
+  return `registry answered ${res.status}`;
+}
+
 /** Does this name exist in the other ecosystem? Guards against wrong-ecosystem false phantoms. */
 async function existsInOther(name, ecosystem) {
   const other = ecosystem === "npm" ? "pypi" : "npm";
@@ -123,7 +131,7 @@ async function fetchNpmFacts(dep, urls) {
       const lt = full.json["dist-tags"]?.latest;
       if (lt && full.json.versions?.[lt]?.deprecated) deprecated = true;
     } else if (!exists) {
-      return { error: `registry answered ${full.status}` };
+      return { error: describeFetchError(full) };
     }
   }
 
@@ -137,7 +145,7 @@ async function fetchPypiFacts(dep, urls) {
   if (r.status === 404 || (r.json && r.json.error)) {
     return { exists: false, foundIn: (await existsInOther(dep.name, dep.ecosystem)) ? "other" : null };
   }
-  if (!r.ok || !r.json) return { error: `registry answered ${r.status}` };
+  if (!r.ok || !r.json) return { error: describeFetchError(r) };
 
   let earliest = null;
   for (const files of Object.values(r.json.releases ?? {})) {

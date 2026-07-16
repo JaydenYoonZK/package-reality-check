@@ -1,6 +1,6 @@
 /*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.57";
-import { fetchFacts } from "./registry.js?v=1.7.57";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.58";
+import { fetchFacts } from "./registry.js?v=1.7.58";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -233,6 +233,13 @@ syncControls();
 
 const toTop = document.getElementById("to-top");
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+// SMIL animations are not covered by CSS reduced-motion rules, pause them.
+function applyReducedMotion() {
+  if (reducedMotion.matches) document.querySelectorAll("svg").forEach((el) => el.pauseAnimations?.());
+  else document.querySelectorAll("svg").forEach((el) => el.unpauseAnimations?.());
+}
+applyReducedMotion();
+reducedMotion.addEventListener?.("change", applyReducedMotion);
 if (toTop) {
   addEventListener("scroll", () => {
     toTop.classList.toggle("show", scrollY > 600);
@@ -257,7 +264,8 @@ themeToggle.addEventListener("click", () => {
     const vt = document.startViewTransition(() => {
       const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
       document.documentElement.dataset.theme = next;
-      localStorage.setItem("theme", next);
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#f6f4ee" : "#0d0c0a");
+      try { localStorage.setItem("theme", next); } catch { /* storage may be blocked */ }
       syncThemeIcon();
     });
     vt.finished.finally(() => document.documentElement.classList.remove("vt-active"));
@@ -268,7 +276,8 @@ themeToggle.addEventListener("click", () => {
   themeFadeTimer = setTimeout(() => document.documentElement.classList.remove("theme-fading"), 500);
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
   document.documentElement.dataset.theme = next;
-  localStorage.setItem("theme", next);
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#f6f4ee" : "#0d0c0a");
+  try { localStorage.setItem("theme", next); } catch { /* storage may be blocked */ }
   syncThemeIcon();
 });
 syncThemeIcon();

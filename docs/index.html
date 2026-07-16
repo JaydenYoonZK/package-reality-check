@@ -25,19 +25,24 @@
   <meta name="twitter:image" content="https://jaydenyoonzk.github.io/package-reality-check/assets/og.png">
   <script>
     (function () {
-      var t = new URLSearchParams(location.search).get("theme") || localStorage.getItem("theme");
+      var t = new URLSearchParams(location.search).get("theme");
+      if (!t) { try { t = localStorage.getItem("theme"); } catch (e) { /* storage may be blocked */ } }
       if (t !== "light" && t !== "dark") t = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
       document.documentElement.dataset.theme = t;
+      var m = document.createElement("meta");
+      m.name = "theme-color";
+      m.content = t === "light" ? "#f6f4ee" : "#0d0c0a";
+      document.head.appendChild(m);
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=1.7.57">
+  <link rel="stylesheet" href="styles.css?v=1.7.58">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "Package Reality Check",
     "applicationCategory": "DeveloperApplication",
-    "softwareVersion": "1.7.57",
+    "softwareVersion": "1.7.58",
     "operatingSystem": "Any (browser-based)",
     "url": "https://jaydenyoonzk.github.io/package-reality-check/",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
@@ -267,7 +272,7 @@
       <div class="cli-card">
         <h3>Fail the build on danger</h3>
         <pre class="snippet"><code>npx github:JaydenYoonZK/package-reality-check --fail-on danger</code></pre>
-        <p class="cli-note">Exits nonzero at your chosen severity: <code>phantom</code>, <code>danger</code>, <code>warn</code>, or <code>never</code>. Add <code>--json</code> for pipelines and <code>--include-code</code> to also scan import statements in source files.</p>
+        <p class="cli-note">Exits non-zero at your chosen severity: <code>phantom</code>, <code>danger</code>, <code>warn</code>, or <code>never</code>. Add <code>--json</code> for pipelines and <code>--include-code</code> to also scan import statements in source files.</p>
         <button class="cli-copy" type="button" aria-label="Copy the fail-on command">Copy</button>
       </div>
       <div class="cli-card">
@@ -356,6 +361,6 @@
 </footer>
 
 <button id="to-top" class="to-top" type="button" aria-label="Back to top">&#8593;</button>
-<script type="module" src="app.js?v=1.7.57"></script>
+<script type="module" src="app.js?v=1.7.58"></script>
 </body>
 </html>

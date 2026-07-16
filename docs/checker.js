@@ -256,6 +256,11 @@ export function parseRequirements(text) {
     if (!line || line.startsWith("-")) continue;      // options like -r, --hash
     if (/^(git\+|https?:|file:)/i.test(line)) continue; // direct URLs
     line = line.split(";")[0].trim();                  // environment markers
+    // PEP 508 direct reference "name [extras] @ url" pins to a URL, VCS, or
+    // path source, not a registry release, so skip it like the npm git/url
+    // specs rather than looking the name up and calling it a phantom.
+    const directRef = line.match(/^[A-Za-z0-9][A-Za-z0-9._-]*(\[[^\]]*\])?\s*@\s*(.+)$/);
+    if (directRef && /^(git\+|https?:|file:|ssh:|\.|\/)/i.test(directRef[2].trim())) continue;
     const m = line.match(/^([A-Za-z0-9][A-Za-z0-9._-]*)/);
     if (!m) continue;
     out.push({ name: m[1], ecosystem: "pypi", spec: line.slice(m[1].length).trim(), source: "requirements" });
@@ -313,7 +318,15 @@ export function parsePyproject(text) {
           table === "project.optional-dependencies";
         if (wantArray && key[3].startsWith("[")) collecting = true;
         else if (POETRY_DEPS.test(table) && key[2].toLowerCase() !== "python") {
-          out.push({ name: key[2], ecosystem: "pypi", spec: "", source: "pyproject" });
+          // An inline table pointing at a git, path, url, or file source is not
+          // a registry dependency (the same cases resolveNpmDep excludes for
+          // npm), so skip it and keep forks and monorepo paths from lighting up
+          // as phantoms.
+          const value = key[3];
+          const nonRegistrySource = value.startsWith("{") && /(^|[{,\s])(git|path|url|file)\s*=/.test(value);
+          if (!nonRegistrySource) {
+            out.push({ name: key[2], ecosystem: "pypi", spec: "", source: "pyproject" });
+          }
           continue; // a Poetry value is a version or inline table, not a requirement string
         }
       }
@@ -344,12 +357,21 @@ const isIdent = (ch) => /[A-Za-z0-9_$]/.test(ch ?? "");
 // list deliberately small: every entry must be a stable, widely documented
 // mapping rather than a guess about which distribution provides a namespace.
 export const PY_IMPORT_DISTRIBUTIONS = Object.freeze({
+  Crypto: "pycryptodome",
+  OpenSSL: "pyOpenSSL",
   PIL: "Pillow",
   bs4: "beautifulsoup4",
   cv2: "opencv-python",
   dateutil: "python-dateutil",
   dotenv: "python-dotenv",
+  jwt: "PyJWT",
+  pythoncom: "pywin32",
+  pywintypes: "pywin32",
   sklearn: "scikit-learn",
+  win32api: "pywin32",
+  win32com: "pywin32",
+  win32con: "pywin32",
+  win32file: "pywin32",
   yaml: "PyYAML"
 });
 

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   extract, parsePackageJson, resolveNpmDep, parseRequirements, parsePyproject, parseJsImports, parsePyImports,
   editDistance, lookalikeOf, normalizePypi, verdict, registryUrls, isValidPackageName,
-  POPULAR_NPM, POPULAR_PYPI
+  POPULAR_NPM, POPULAR_PYPI, PY_IMPORT_DISTRIBUTIONS
 } from "../docs/checker.js";
 
 test("parsePyproject reads PEP 621 dependencies, optional groups, and build requires", () => {
@@ -439,4 +439,42 @@ test("registry URLs encode scoped and normalized names", () => {
     "https://registry.npmjs.org/%40scope%2Fpkg/latest");
   assert.equal(registryUrls("Flask_SQLAlchemy", "pypi").api,
     "https://pypi.org/pypi/flask-sqlalchemy/json");
+});
+
+test("parsePyproject skips Poetry git/path/url/file deps, keeps registry deps", () => {
+  const deps = parsePyproject([
+    '[tool.poetry.dependencies]',
+    'python = "^3.11"',
+    'requests = "^2.31"',
+    'forked-httpx = { git = "https://github.com/x/httpx.git", branch = "main" }',
+    'my-internal-lib = { path = "../internal", develop = true }',
+    'some-tarball = { url = "https://example.com/pkg.tar.gz" }',
+    'local-file-dep = { file = "dist/pkg.whl" }',
+    'pinned = { version = "^1.2", extras = ["a"] }'
+  ].join("\n"));
+  const names = deps.map(d => d.name).sort();
+  assert.deepEqual(names, ["pinned", "requests"]);
+});
+
+test("parseRequirements skips PEP 508 direct references (name @ url)", () => {
+  const deps = parseRequirements([
+    "requests==2.31.0",
+    "flask",
+    "myinternal-utils @ git+https://github.com/myorg/myinternal-utils.git@v1.2.0",
+    "foo[bar] @ https://example.com/foo.whl",
+    "localpkg @ file:///abs/path",
+    "relpkg @ ./local",
+    "normal-extras[x]>=1.0"
+  ].join("\n"));
+  const names = deps.map(d => d.name).sort();
+  assert.deepEqual(names, ["flask", "normal-extras", "requests"]);
+});
+
+test("PY_IMPORT_DISTRIBUTIONS maps pyOpenSSL and pywin32 import names", () => {
+  assert.equal(PY_IMPORT_DISTRIBUTIONS.OpenSSL, "pyOpenSSL");
+  for (const mod of ["win32api", "win32con", "win32file", "win32com", "pythoncom", "pywintypes"]) {
+    assert.equal(PY_IMPORT_DISTRIBUTIONS[mod], "pywin32");
+  }
+  const deps = parsePyImports("from OpenSSL import SSL\nimport win32api");
+  assert.deepEqual(deps.map(d => d.name).sort(), ["pyOpenSSL", "pywin32"]);
 });
