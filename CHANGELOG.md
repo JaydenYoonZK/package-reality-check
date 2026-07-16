@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.57] - 2026-07-16
+
+### Added
+
+- A color option on the shared brand banner module, so a future --no-color style flag can render it plain; NO_COLOR already could.
+
 ## [1.7.56] - 2026-07-16
 
 ### Added
