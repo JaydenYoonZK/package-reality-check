@@ -16,6 +16,7 @@ import { join, resolve, relative, extname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parsePackageJson, parseRequirements, parsePyproject, parseJsImports, parsePyImports, normalizePypi } from "../docs/checker.js";
 import { checkAll } from "../docs/registry.js";
+import { printBanner } from "./banner.mjs";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const VERSION = JSON.parse(readFileSync(join(HERE, "..", "package.json"), "utf8")).version;
@@ -295,7 +296,7 @@ export function exitCodeForResults(results, failOn) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
-  if (opts.help) { console.log(HELP); process.exit(0); }
+  if (opts.help) { printBanner(`package-reality-check v${VERSION}`); console.log(HELP); process.exit(0); }
   if (opts.version) { console.log(VERSION); process.exit(0); }
   if (opts.badFlag) { console.error(`Unknown option: ${safeText(opts.badFlag)}\nRun with --help.`); process.exit(2); }
   if (opts.extraArg) { console.error(`Unexpected argument: ${safeText(opts.extraArg)}. Pass a single project directory.`); process.exit(2); }
@@ -313,6 +314,7 @@ async function main() {
   try { if (!statSync(root).isDirectory()) throw 0; }
   catch { console.error(`Not a directory: ${safeText(opts.path)}`); process.exit(2); }
 
+  if (!opts.json && !opts.quiet) printBanner(`package-reality-check v${VERSION}`);
   const colorEnabled = opts.color !== null ? opts.color : (process.stdout.isTTY && !process.env.NO_COLOR);
   const c = makeColor(colorEnabled);
 
