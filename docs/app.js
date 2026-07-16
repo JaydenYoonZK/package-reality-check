@@ -1,6 +1,6 @@
 /*! Package Reality Check | Copyright (c) 2026 Jayden Yoon ZK | MIT License | https://github.com/JaydenYoonZK/package-reality-check */
-import { extract, verdict, registryUrls } from "./checker.js?v=1.7.54";
-import { fetchFacts } from "./registry.js?v=1.7.54";
+import { extract, verdict, registryUrls } from "./checker.js?v=1.7.55";
+import { fetchFacts } from "./registry.js?v=1.7.55";
 
 const $ = (id) => document.getElementById(id);
 const input = $("input");
@@ -498,5 +498,17 @@ document.querySelectorAll(".faq-q button").forEach((btn) => {
     const item = btn.closest(".faq-item");
     const open = item.classList.toggle("open");
     btn.setAttribute("aria-expanded", String(open));
+  });
+});
+
+// Terminal section: copy a command with one press.
+document.querySelectorAll(".cli-copy").forEach((btn) => {
+  btn.addEventListener("click", async () => {
+    const code = btn.closest(".cli-card")?.querySelector("code");
+    if (!code) return;
+    try { await navigator.clipboard.writeText(code.textContent.trim()); } catch { return; }
+    const label = btn.textContent;
+    btn.textContent = "Copied \u2713";
+    setTimeout(() => { btn.textContent = label; }, 1400);
   });
 });

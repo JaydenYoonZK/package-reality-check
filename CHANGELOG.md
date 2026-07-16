@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.55] - 2026-07-15
+
+### Added
+
+- A Terminal section on the page: three copyable command cards for checking a project, failing the build at a chosen severity, and the one-step GitHub Action, all linked from the navigation.
+
 ## [1.7.54] - 2026-07-15
 
 ### Added
@@ -670,6 +676,7 @@ First stable release.
 - Dependency-free ES module engine (`docs/checker.js`) with 15 Node tests.
 - `?demo` URL parameter that loads a sample with planted phantoms.
 
+[1.7.55]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.55
 [1.7.54]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.54
 [1.7.53]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.53
 [1.7.52]: https://github.com/JaydenYoonZK/package-reality-check/releases/tag/v1.7.52
