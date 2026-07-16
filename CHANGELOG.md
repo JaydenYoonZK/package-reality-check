@@ -24,8 +24,8 @@ A deep quality pass from an adversarial pre-launch review: correctness of the de
 
 - The import-name map covers pyOpenSSL and pywin32 (and PyJWT, pycryptodome), so `--include-code` no longer false-phantoms those common packages.
 - A `theme-color` meta follows the active theme so mobile browser chrome matches the page.
-- The `--help` exit-code note and the site's "non-zero" wording match the README exactly.
-- `funding` field in package.json, and the GitHub repo description and topics now name the Action.
+- The `--help` exit-code note and the site's "non-zero" wording now agree with the README.
+- Added a `funding` field to package.json; the GitHub repo description and topics now name the Action.
 
 ## [1.7.57] - 2026-07-16
 
