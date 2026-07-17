@@ -5,8 +5,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.7.58] - 2026-07-16
 
-A deep quality pass from an adversarial pre-launch review: correctness of the detection verdicts, the CLI, the page, and the docs.
-
 ### Fixed
 
 - Poetry git, path, url, and file dependencies are no longer reported as phantom ("an AI likely invented it"). An inline table pointing at a non-registry source is skipped, the same way the npm parser already skips git and file specs, so a normal Poetry monorepo or fork no longer lights up as hallucinated.
@@ -438,11 +436,6 @@ A deep quality pass from an adversarial pre-launch review: correctness of the de
 ### Changed
 
 - Accessibility: the paste box now has a real label instead of one hidden with `display:none`, which removed it from the accessibility tree.
-
-### Notes
-
-This release included live npm and PyPI checks for scoped packages, wrong-ecosystem names, established lookalikes, and supported manifest layouts.
-
 ## [1.5.17] - 2026-07-09
 
 ### Changed
