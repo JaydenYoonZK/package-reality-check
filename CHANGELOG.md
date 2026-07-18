@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.7.59] - 2026-07-18
+
+### Added
+
+- PNG app icons for the browser tab and home screen.
+- The site icon now shows on the not-found page.
+
+### Changed
+
+- The link preview image points at the 1280 by 640 social card.
+
 ## [1.7.58] - 2026-07-16
 
 ### Fixed
