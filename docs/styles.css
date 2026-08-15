@@ -674,6 +674,8 @@ footer .legal {
   letter-spacing: 0.02em;
   opacity: 0.85;
 }
+footer .legal p { margin: 0; }
+footer .legal .legal-version { margin-top: 4px; }
 
 /* ---- Footer credits ----
    The projects this tool stands on, as quiet outlined chips: name, licence
