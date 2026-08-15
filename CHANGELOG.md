@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.12] - 2026-08-16
+
+### Fixed
+
+- The film grain texture used to be glued to the screen, and on an iPhone that kind of full-screen fixed layer makes Safari composite scrolled page content up into the strip around the clock and battery. The grain now sits on the page itself and stretches over the whole document, so that strip stays clean while the texture looks exactly as before.
+
 ## [1.8.11] - 2026-08-16
 
 ### Fixed
