@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.10] - 2026-08-16
+
+### Fixed
+
+- The shield over that strip now rides fixed to the viewport instead of sticky, because under a fast scroll Safari can let a sticky element lag a frame behind and flash the page through the gap.
+
 ## [1.8.9] - 2026-08-16
 
 ### Fixed
