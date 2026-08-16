@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.14] - 2026-08-16
+
+### Changed
+
+- The name seal beside the brand is now a square chop, and its characters and inner frame are cut straight through the chartreuse field, so whatever the bar shows behind them fills the strokes and the seal reads equally well in light and dark mode. The brand name is set slightly larger to sit in balance with it.
+
 ## [1.8.13] - 2026-08-16
 
 ### Added
