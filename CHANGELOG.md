@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.13] - 2026-08-16
+
+### Added
+
+- The brand link in the navigation now carries 袁正凯, Jayden's Chinese name, rendered as a small vertical seal beside the Latin name. It is set in the same chartreuse and dark ink the buttons wear, with a thin inner frame like a traditional stamp.
+
 ## [1.8.12] - 2026-08-16
 
 ### Fixed
